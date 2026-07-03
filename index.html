@@ -1,49 +1,111 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Concentration Converter — SK015</title>
-<!-- STRUCTURE ONLY: styling lives in css/styles.css, behaviour in js/ -->
-<link rel="stylesheet" href="css/styles.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Concentration Trainer — SK015</title>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-<div class="wrap">
-  <header class="head">
-    <div class="eyebrow">SK015 · Solution Concentration</div>
-    <h1>Concentration Converter</h1>
-    <p class="sub">Convert between molarity, molality, percentage by mass, percentage by volume, and mole fraction — with full step-by-step working.</p>
+  <header class="site-header">
+    <span class="eyebrow">SK015 · Solution Concentration</span>
+    <h1 class="site-title">Concentration Trainer</h1>
   </header>
 
-  <section class="card">
-    <div class="route">
-      <label class="fld" style="margin:0">
-        <span class="cap">Convert from</span>
-        <select id="from"><option value="" disabled selected>Choose a measure…</option></select>
-      </label>
-      <div class="arrow" aria-hidden="true">→</div>
-      <label class="fld" style="margin:0">
-        <span class="cap">Convert to</span>
-        <select id="to" disabled><option value="" disabled selected>Choose a measure…</option></select>
-      </label>
-    </div>
-    <div id="params"></div>
-  </section>
+  <main>
+    <!-- ============ SCREEN 1 · LANDING ============ -->
+    <section id="screen-landing" class="screen is-active">
+      <p class="hero-lead">I am here today to…</p>
+      <div class="choice-grid">
+        <button class="choice-card" data-goto="learn" type="button">
+          <span class="choice-verb">Learn</span>
+          <span class="choice-desc">Walk me through a conversion, one step at a time — the thinking first, then the numbers.</span>
+        </button>
+        <button class="choice-card choice-card--amber" data-goto="check" type="button">
+          <span class="choice-verb">Check My Answers</span>
+          <span class="choice-desc">I have already worked it out. Convert it for me so I can compare.</span>
+        </button>
+      </div>
+    </section>
 
-  <div id="output"></div>
+    <!-- ============ SCREEN 2 · LEARN ============ -->
+    <section id="screen-learn" class="screen">
+      <button class="back-link" data-goto="landing" type="button">← Back to start</button>
 
-  <footer>
-    <button class="reset" id="reset" type="button">Clear all fields</button>
-    <p style="margin:10px 0 0">Percentages entered as 0–100 · mole fraction as 0–1 (fraction of solute)</p>
+      <!-- Prompt 1: target -->
+      <div class="prompt-card" id="learn-prompt-target">
+        <span class="prompt-step">Step 1</span>
+        <label class="prompt-question" for="learn-target">What kind of concentration are you trying to calculate?</label>
+        <select id="learn-target" class="select"></select>
+      </div>
+
+      <!-- Prompt 2: source -->
+      <div class="prompt-card" id="learn-prompt-source" hidden>
+        <span class="prompt-step">Step 2</span>
+        <label class="prompt-question" for="learn-source">What concentration do you already have?</label>
+        <select id="learn-source" class="select"></select>
+      </div>
+
+      <!-- Fields -->
+      <div class="fields-card" id="learn-fields" hidden>
+        <span class="prompt-step">Step 3</span>
+        <p class="prompt-question" id="learn-fields-title">Fill in what you know</p>
+        <div class="field-list" id="learn-field-list"></div>
+        <p class="form-error" id="learn-error" hidden></p>
+        <button class="btn btn--primary" id="learn-start" type="button">Work it out</button>
+      </div>
+
+      <!-- Solution reveal -->
+      <div class="solution" id="learn-solution" hidden>
+        <h2 class="solution-heading">Working</h2>
+        <div class="reveal-list" id="learn-reveal-list"></div>
+        <div class="reveal-controls">
+          <button class="btn btn--primary" id="learn-reveal-next" type="button">Reveal the strategy</button>
+          <button class="btn btn--ghost" id="learn-restart" type="button" hidden>Start a new one</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SCREEN 3 · CHECK MY ANSWERS ============ -->
+    <section id="screen-check" class="screen">
+      <button class="back-link" data-goto="landing" type="button">← Back to start</button>
+
+      <div class="converter-bar">
+        <div class="converter-field">
+          <label class="field-label" for="check-from">Convert from</label>
+          <select id="check-from" class="select"><option value="">Choose a measure…</option></select>
+        </div>
+        <span class="converter-arrow" aria-hidden="true">→</span>
+        <div class="converter-field">
+          <label class="field-label" for="check-to">Convert to</label>
+          <select id="check-to" class="select"><option value="">Choose a measure…</option></select>
+        </div>
+      </div>
+
+      <div class="fields-card" id="check-fields" hidden>
+        <div class="field-list" id="check-field-list"></div>
+        <p class="form-error" id="check-error" hidden></p>
+        <div class="check-actions">
+          <button class="btn btn--primary" id="check-run" type="button">Convert</button>
+          <button class="btn btn--ghost" id="check-clear" type="button">Clear fields</button>
+        </div>
+      </div>
+
+      <div class="solution" id="check-solution" hidden>
+        <h2 class="solution-heading">Full working</h2>
+        <div class="reveal-list" id="check-reveal-list"></div>
+      </div>
+
+      <p class="fineprint">Percentages entered as 0–100 · mole fraction as 0–1 (fraction of solute)</p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>Built for SK015 Matriculation Chemistry · concentrations interconverted with full working</p>
   </footer>
-</div>
 
-<!-- BEHAVIOUR: load order matters — data & helpers first, ui.js last -->
-<script src="js/config.js"></script>
-<script src="js/format.js"></script>
-<script src="js/conversions.js"></script>
-<script src="js/steps.js"></script>
-<script src="js/ui.js"></script>
+  <!-- logic first, then the app that uses it -->
+  <script src="chemistry.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
-
