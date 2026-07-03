@@ -1,54 +1,77 @@
-[README.md](https://github.com/user-attachments/files/29619140/README.md)
-# Concentration Converter — SK015
+# Concentration Trainer — deployment package
 
-Converts between molarity, molality, % by mass, % by volume, and mole fraction,
-with full step-by-step working (basis method).
+This replaces your current site at **azlanyaacob92.github.io/concentrationtrainer**.
 
-## Folder structure
+## What's changed
 
-```
-concentration-converter/
-├── index.html          ← STRUCTURE: page skeleton only (no CSS, no JS)
-├── css/
-│   └── styles.css      ← STYLING: colours, fonts, layout, animations
-└── js/
-    ├── config.js       ← DATA: measure names, units, parameter labels
-    ├── format.js       ← UTILITIES: number formatting, step/fraction HTML
-    ├── conversions.js  ← CHEMISTRY: the 20 direct conversion formulas
-    ├── steps.js        ← CHEMISTRY: step-by-step worked solutions
-    └── ui.js           ← BEHAVIOUR: DOM wiring, validation, rendering
-```
+- **New landing page** — "I am here today to…" with two buttons: **Learn** and **Check My Answers**.
+- **Learn mode** — two prompts (target measure, then source measure) → data-entry fields → a
+  step-by-step reveal where each step shows the **strategy first**, then a click reveals the
+  **arithmetic**, working through all steps, then a final **answer callout**.
+- **Check My Answers mode** — same from/to converter as your current site, all working shown at
+  once after you press Convert.
+- All **20 directed conversion pairs** (molarity, molality, %w/w, %v/v, mole fraction) verified
+  against textbook values and cross-checked with round-trip tests (A→B→A returns the start value).
+- Same teal/amber visual identity, Georgia display type, clean multi-file structure.
 
-## Who works where
+## Files in this package
 
-| Task | File(s) to edit |
+| File | Purpose |
 |---|---|
-| Change colours, fonts, spacing | `css/styles.css` only |
-| Rename a measure, fix a unit or placeholder | `js/config.js` |
-| Correct a conversion formula | `js/conversions.js` |
-| Improve the worked-solution steps or pedagogy | `js/steps.js` |
-| Change number rounding / sig. figs | `js/format.js` (the `fmt` function) |
-| Add validation, change interactions | `js/ui.js` |
-| Add/remove page elements | `index.html` (+ matching CSS/JS) |
+| `index.html` | Page structure — landing, Learn, Check My Answers |
+| `styles.css` | All appearance (teal/amber theme) |
+| `chemistry.js` | The chemistry — every conversion formula and its step text, no UI code |
+| `app.js` | The behaviour — screen switching, form building, the reveal flow |
 
-## Script load order (important)
+Load order matters: `index.html` loads `chemistry.js` before `app.js`.
 
-The `<script>` tags in `index.html` must stay in this order, because later
-files use variables defined in earlier ones:
+## How to upload to your existing repository
 
-1. `config.js` → 2. `format.js` → 3. `conversions.js` → 4. `steps.js` → 5. `ui.js`
+You already have the repo `azlanyaacob92/concentrationtrainer` connected to GitHub Pages, so you
+are just replacing the files inside it.
 
-`ui.js` must always be **last** — it reads the DOM and wires everything up.
+1. Go to **https://github.com/azlanyaacob92/concentrationtrainer**
+2. For **each of the 4 files** in this package:
+   - Click on the file with the same name in your repo (e.g. `index.html`). If a file doesn't
+     exist yet (e.g. `chemistry.js`), click **Add file → Create new file** instead and type the
+     filename.
+   - Click the **pencil (✎) icon** to edit (skip this for new files).
+   - Select all existing content and delete it.
+   - Open the corresponding file from this package, copy everything, and paste it in.
+   - Scroll down, add a short commit message like `Rebuild: landing page + Learn/Check modes`,
+     and click **Commit changes** (commit directly to `main`).
+3. Repeat for `styles.css`, `app.js`, and `chemistry.js`.
+4. If your repo has any **old files** this version doesn't use (e.g. leftover `config.js`,
+   `format.js`, `conversions.js`, `steps.js`, `ui.js` from the earlier multi-file version), delete
+   them from the repo so nothing conflicting is left over — open each one, click the trash icon,
+   commit the deletion.
+5. Wait about 30–60 seconds, then visit **https://azlanyaacob92.github.io/concentrationtrainer/**
+   (a hard refresh — Ctrl/Cmd+Shift+R — helps if you still see the old version, since GitHub Pages
+   and browsers both cache).
 
-## Adding a new measure (e.g. ppm)
+### Alternative: upload as a batch (faster)
 
-1. `config.js` — add an entry to `M` and its key to `order`.
-2. `conversions.js` — add `"newkey|other"` and `"other|newkey"` entries to `C`.
-3. `steps.js` — add a `BASIS` entry and matching `STEPS` builders.
-4. No changes needed in `ui.js` — it builds everything from the data tables.
+Instead of editing file-by-file:
+1. On the repo's main page, click **Add file → Upload files**.
+2. Drag in all 4 files from this package at once — GitHub will overwrite any existing files with
+   the same names automatically.
+3. Delete the leftover old files mentioned in step 4 above if present.
+4. Commit directly to `main`.
 
-## Running locally
+## Testing it yourself before/after upload
 
-Plain script tags (no ES modules), so it works by simply opening
-`index.html` in a browser — no server needed. Also deploys as-is to
-GitHub Pages.
+If you want to preview locally first: put all 4 files in one folder, then open `index.html`
+directly in a browser (double-click it), or run a tiny local server from that folder
+(e.g. `python3 -m http.server 8000` then visit `http://localhost:8000`) — either works since
+there's no build step.
+
+## Notes on the chemistry
+
+- Every conversion works from a **fixed basis** (1 L of solution, 1 kg of solvent, 100 g of
+  solution, 100 mL of solution, or 1 mol total) — the same method used in the SK015 course, and
+  the same reasoning shown to students in each strategy line.
+- Percentage-by-volume conversions carry a visible note that they assume volumes are additive
+  (a standard simplifying assumption at this level, not exact for all real liquid pairs).
+- Field requirements are computed automatically per conversion pair — e.g. molarity→molality only
+  asks for molar mass and density; molarity→mole fraction also asks for the solvent's molar mass.
+  Only what's needed for a given conversion appears.
