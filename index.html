@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Concentration Converter — SK015</title>
+<!-- STRUCTURE ONLY: styling lives in css/styles.css, behaviour in js/ -->
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<div class="wrap">
+  <header class="head">
+    <div class="eyebrow">SK015 · Solution Concentration</div>
+    <h1>Concentration Converter</h1>
+    <p class="sub">Convert between molarity, molality, percentage by mass, percentage by volume, and mole fraction — with full step-by-step working.</p>
+  </header>
+
+  <section class="card">
+    <div class="route">
+      <label class="fld" style="margin:0">
+        <span class="cap">Convert from</span>
+        <select id="from"><option value="" disabled selected>Choose a measure…</option></select>
+      </label>
+      <div class="arrow" aria-hidden="true">→</div>
+      <label class="fld" style="margin:0">
+        <span class="cap">Convert to</span>
+        <select id="to" disabled><option value="" disabled selected>Choose a measure…</option></select>
+      </label>
+    </div>
+    <div id="params"></div>
+  </section>
+
+  <div id="output"></div>
+
+  <footer>
+    <button class="reset" id="reset" type="button">Clear all fields</button>
+    <p style="margin:10px 0 0">Percentages entered as 0–100 · mole fraction as 0–1 (fraction of solute)</p>
+  </footer>
+</div>
+
+<!-- BEHAVIOUR: load order matters — data & helpers first, ui.js last -->
+<script src="js/config.js"></script>
+<script src="js/format.js"></script>
+<script src="js/conversions.js"></script>
+<script src="js/steps.js"></script>
+<script src="js/ui.js"></script>
+</body>
+</html>
