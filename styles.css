@@ -78,7 +78,7 @@ main { max-width: 760px; margin: 0 auto; padding: 8px 24px 0; }
 
 /* ---------- screen switching ---------- */
 .screen { display: none; }
-.screen.is-active { display: block; animation: fade .5s var(--ease-buttery); }
+.screen.is-active { display: block; animation: fade .65s var(--ease-buttery); }
 @keyframes fade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 
 /* ---------- landing ---------- */
@@ -113,7 +113,7 @@ main { max-width: 760px; margin: 0 auto; padding: 8px 24px 0; }
   color: var(--teal-900);
 }
 .choice-card--amber .choice-verb { color: var(--amber-600); }
-.choice-desc { color: var(--muted); font-size: .95rem; }
+.choice-desc { color: var(--muted); font-size: .95rem; font-family: var(--display); }
 
 /* ---------- back link ---------- */
 .back-link {
@@ -132,10 +132,12 @@ main { max-width: 760px; margin: 0 auto; padding: 8px 24px 0; }
   padding: 22px;
   box-shadow: var(--shadow);
   margin-bottom: 16px;
-  animation: fade .45s var(--ease-buttery);
+  font-family: var(--display);
+  animation: fade .65s var(--ease-buttery);
 }
 .prompt-step {
   display: inline-block;
+  font-family: var(--body);
   font-size: .7rem; letter-spacing: .12em; text-transform: uppercase;
   color: var(--teal-700); font-weight: 700; margin-bottom: 10px;
 }
@@ -166,7 +168,7 @@ main { max-width: 760px; margin: 0 auto; padding: 8px 24px 0; }
 
 .field-list { display: flex; flex-direction: column; gap: 14px; }
 .field-row { display: flex; flex-direction: column; gap: 6px; }
-.field-label { font-size: .9rem; font-weight: 600; color: var(--ink); }
+.field-label { font-size: .9rem; font-weight: 600; color: var(--ink); font-family: var(--display); }
 .field-unit { color: var(--muted); font-weight: 400; }
 .input-wrap { position: relative; }
 
@@ -218,8 +220,28 @@ main { max-width: 760px; margin: 0 auto; padding: 8px 24px 0; }
   .converter-arrow { display: none; }
 }
 
+/* ---------- stacked fractions in the calculation working ---------- */
+.frac {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+  margin: 0 6px;
+  line-height: 1.3;
+  font-size: .92em;
+  position: relative;
+  top: -.05em;
+}
+.frac-num { padding: 0 3px 3px; border-bottom: 1.4px solid currentColor; }
+.frac-den { padding: 3px 3px 0; }
+
 /* ---------- solution / reveal cards (the signature) ---------- */
-.solution { margin-top: 8px; animation: fade .45s var(--ease-buttery); }
+.solution {
+  margin-top: 8px;
+  font-family: var(--display);
+  animation: fade .65s var(--ease-buttery);
+}
 .solution-heading {
   font-family: var(--display);
   font-size: 1.4rem;
@@ -228,7 +250,7 @@ main { max-width: 760px; margin: 0 auto; padding: 8px 24px 0; }
 }
 .reveal-list { display: flex; flex-direction: column; gap: 14px; }
 
-.step-block { animation: fade .5s var(--ease-buttery); }
+.step-block { animation: fade .75s var(--ease-buttery); }
 
 /* Strategy card: the justification, revealed first. Leads with a
    short instruction (the move being made), then the reasoning for
@@ -241,6 +263,7 @@ main { max-width: 760px; margin: 0 auto; padding: 8px 24px 0; }
   padding: 16px 18px;
 }
 .strategy-eyebrow {
+  font-family: var(--body);
   font-size: .68rem; letter-spacing: .12em; text-transform: uppercase;
   color: var(--teal-700); font-weight: 700; display: block; margin-bottom: 6px;
 }
@@ -250,10 +273,12 @@ main { max-width: 760px; margin: 0 auto; padding: 8px 24px 0; }
   font-size: 1.05rem;
   color: var(--teal-900);
 }
-.strategy-text { margin: 0; color: var(--ink); }
+.strategy-text { margin: 0; color: var(--ink); font-family: var(--display); }
 
 /* Calculation card: teal's amber counterpart — same light, cream-ish
-   family as the rest of the page, not the old dark navy block. */
+   family as the rest of the page, not the old dark navy block. Georgia
+   throughout, including the working itself, per house style — the
+   .frac stacked-fraction markup reads cleanly in it. */
 .math-card {
   background: var(--amber-100);
   color: var(--ink);
@@ -262,11 +287,11 @@ main { max-width: 760px; margin: 0 auto; padding: 8px 24px 0; }
   border-radius: 12px;
   padding: 16px 18px;
   margin-top: 10px;
-  font-family: var(--mono);
-  font-size: .95rem;
-  line-height: 1.8;
+  font-family: var(--display);
+  font-size: 1.05rem;
+  line-height: 2;
   overflow-x: auto;
-  animation: fade .5s var(--ease-buttery);
+  animation: fade .75s var(--ease-buttery);
 }
 .math-eyebrow {
   font-size: .68rem; letter-spacing: .12em; text-transform: uppercase;
@@ -282,9 +307,10 @@ main { max-width: 760px; margin: 0 auto; padding: 8px 24px 0; }
   border-radius: 12px;
   padding: 20px 22px;
   margin-top: 4px;
-  animation: fade .55s var(--ease-buttery);
+  animation: fade .85s var(--ease-buttery);
 }
 .answer-eyebrow {
+  font-family: var(--body);
   font-size: .7rem; letter-spacing: .12em; text-transform: uppercase;
   color: var(--amber-600); font-weight: 700; display: block; margin-bottom: 6px;
 }
@@ -295,7 +321,8 @@ main { max-width: 760px; margin: 0 auto; padding: 8px 24px 0; }
   margin: 0;
 }
 
-.fineprint { color: var(--muted); font-size: .8rem; margin-top: 20px; }
+.fineprint { color: var(--muted); font-size: .8rem; margin-top: 20px; font-family: var(--body); }
+
 
 /* ---------- accessibility: respect reduced motion ---------- */
 @media (prefers-reduced-motion: reduce) {
