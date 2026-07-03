@@ -26,6 +26,10 @@
   --display: Georgia, "Times New Roman", serif;
   --body: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --mono: "SFMono-Regular", ui-monospace, Menlo, Consolas, monospace;
+
+  /* one easing curve, used everywhere, so every transition feels
+     like part of the same material — slow to start, glides to rest */
+  --ease-buttery: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 * { box-sizing: border-box; }
@@ -74,8 +78,8 @@ main { max-width: 760px; margin: 0 auto; padding: 8px 24px 0; }
 
 /* ---------- screen switching ---------- */
 .screen { display: none; }
-.screen.is-active { display: block; animation: fade .35s ease; }
-@keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.screen.is-active { display: block; animation: fade .5s var(--ease-buttery); }
+@keyframes fade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 
 /* ---------- landing ---------- */
 .hero-lead {
@@ -97,11 +101,12 @@ main { max-width: 760px; margin: 0 auto; padding: 8px 24px 0; }
   padding: 24px 22px;
   box-shadow: var(--shadow);
   display: flex; flex-direction: column; gap: 10px;
-  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+  transition: transform .3s var(--ease-buttery), box-shadow .3s var(--ease-buttery), border-color .3s var(--ease-buttery);
   border-left: 5px solid var(--teal-600);
 }
 .choice-card--amber { border-left-color: var(--amber-500); border-color: var(--amber-100); }
 .choice-card:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(19,78,74,.12); }
+.choice-card:active { transform: translateY(-1px) scale(.99); transition-duration: .12s; }
 .choice-verb {
   font-family: var(--display);
   font-size: 1.5rem;
@@ -115,8 +120,9 @@ main { max-width: 760px; margin: 0 auto; padding: 8px 24px 0; }
   background: none; border: none; cursor: pointer;
   color: var(--teal-700); font-size: .9rem; font-weight: 600;
   padding: 6px 0; margin: 12px 0 20px;
+  transition: color .2s var(--ease-buttery), transform .2s var(--ease-buttery);
 }
-.back-link:hover { text-decoration: underline; }
+.back-link:hover { text-decoration: underline; color: var(--teal-900); transform: translateX(-2px); }
 
 /* ---------- prompt / fields cards ---------- */
 .prompt-card, .fields-card {
@@ -126,7 +132,7 @@ main { max-width: 760px; margin: 0 auto; padding: 8px 24px 0; }
   padding: 22px;
   box-shadow: var(--shadow);
   margin-bottom: 16px;
-  animation: fade .3s ease;
+  animation: fade .45s var(--ease-buttery);
 }
 .prompt-step {
   display: inline-block;
@@ -151,6 +157,7 @@ main { max-width: 760px; margin: 0 auto; padding: 8px 24px 0; }
   border: 1px solid var(--line);
   border-radius: 10px;
   padding: 11px 13px;
+  transition: border-color .2s var(--ease-buttery), outline-color .2s var(--ease-buttery), box-shadow .2s var(--ease-buttery);
 }
 .select:focus, .num-input:focus {
   outline: 3px solid var(--teal-100);
@@ -174,13 +181,13 @@ main { max-width: 760px; margin: 0 auto; padding: 8px 24px 0; }
   padding: 11px 20px;
   cursor: pointer;
   border: 1px solid transparent;
-  transition: background .15s ease, transform .1s ease;
+  transition: background .25s var(--ease-buttery), transform .2s var(--ease-buttery), box-shadow .25s var(--ease-buttery);
 }
-.btn:active { transform: translateY(1px); }
+.btn:active { transform: translateY(1px) scale(.98); transition-duration: .1s; }
 .btn--primary { background: var(--teal-700); color: #fff; }
-.btn--primary:hover { background: var(--teal-900); }
+.btn--primary:hover { background: var(--teal-900); transform: translateY(-1px); box-shadow: 0 6px 16px rgba(19,78,74,.18); }
 .btn--ghost { background: transparent; color: var(--teal-700); border-color: var(--teal-100); }
-.btn--ghost:hover { background: var(--teal-50); }
+.btn--ghost:hover { background: var(--teal-50); transform: translateY(-1px); }
 .btn:focus-visible { outline: 3px solid var(--amber-500); outline-offset: 2px; }
 
 #learn-start, #learn-reveal-next { margin-top: 18px; }
@@ -212,7 +219,7 @@ main { max-width: 760px; margin: 0 auto; padding: 8px 24px 0; }
 }
 
 /* ---------- solution / reveal cards (the signature) ---------- */
-.solution { margin-top: 8px; animation: fade .3s ease; }
+.solution { margin-top: 8px; animation: fade .45s var(--ease-buttery); }
 .solution-heading {
   font-family: var(--display);
   font-size: 1.4rem;
@@ -221,7 +228,11 @@ main { max-width: 760px; margin: 0 auto; padding: 8px 24px 0; }
 }
 .reveal-list { display: flex; flex-direction: column; gap: 14px; }
 
-.step-block { animation: fade .35s ease; }
+.step-block { animation: fade .5s var(--ease-buttery); }
+
+/* Strategy card: the justification, revealed first. Leads with a
+   short instruction (the move being made), then the reasoning for
+   this specific conversion. */
 .strategy-card {
   background: var(--teal-50);
   border: 1px solid var(--teal-100);
@@ -233,11 +244,21 @@ main { max-width: 760px; margin: 0 auto; padding: 8px 24px 0; }
   font-size: .68rem; letter-spacing: .12em; text-transform: uppercase;
   color: var(--teal-700); font-weight: 700; display: block; margin-bottom: 6px;
 }
+.strategy-instruction {
+  margin: 0 0 6px;
+  font-family: var(--display);
+  font-size: 1.05rem;
+  color: var(--teal-900);
+}
 .strategy-text { margin: 0; color: var(--ink); }
 
+/* Calculation card: teal's amber counterpart — same light, cream-ish
+   family as the rest of the page, not the old dark navy block. */
 .math-card {
-  background: #10302e;
-  color: #eafbf7;
+  background: var(--amber-100);
+  color: var(--ink);
+  border: 1px solid rgba(217, 119, 6, .22);
+  border-left: 4px solid var(--amber-600);
   border-radius: 12px;
   padding: 16px 18px;
   margin-top: 10px;
@@ -245,11 +266,11 @@ main { max-width: 760px; margin: 0 auto; padding: 8px 24px 0; }
   font-size: .95rem;
   line-height: 1.8;
   overflow-x: auto;
-  animation: fade .35s ease;
+  animation: fade .5s var(--ease-buttery);
 }
 .math-eyebrow {
   font-size: .68rem; letter-spacing: .12em; text-transform: uppercase;
-  color: var(--amber-500); font-weight: 700; display: block; margin-bottom: 8px;
+  color: var(--amber-600); font-weight: 700; display: block; margin-bottom: 8px;
   font-family: var(--body);
 }
 
@@ -261,7 +282,7 @@ main { max-width: 760px; margin: 0 auto; padding: 8px 24px 0; }
   border-radius: 12px;
   padding: 20px 22px;
   margin-top: 4px;
-  animation: fade .4s ease;
+  animation: fade .55s var(--ease-buttery);
 }
 .answer-eyebrow {
   font-size: .7rem; letter-spacing: .12em; text-transform: uppercase;

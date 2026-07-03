@@ -106,11 +106,27 @@
     return { ok: true, values };
   }
 
-  // Build a strategy card element.
-  function strategyCard(text) {
+  // Every converter's working follows the same three-move method taught
+  // in SK015: pick a basis, bridge to what's missing, apply the definition.
+  // These generic instructions are shown first, above the specific
+  // reasoning for the step, so students read "what move is this" before
+  // "why does it work here".
+  const STEP_INSTRUCTIONS = [
+    'Find a suitable basis for assumption.',
+    'Bridge to what the target measure needs.',
+    'Apply the definition of the target measure.'
+  ];
+
+  // Build a strategy card element. `stepIndex` (0, 1, 2…) picks the
+  // instruction line that gets revealed above the specific reasoning.
+  function strategyCard(text, stepIndex) {
     const d = document.createElement('div');
     d.className = 'strategy-card';
-    d.innerHTML = `<span class="strategy-eyebrow">Strategy</span><p class="strategy-text">${text}</p>`;
+    const instruction = STEP_INSTRUCTIONS[stepIndex];
+    d.innerHTML = `
+      <span class="strategy-eyebrow">Strategy</span>
+      ${instruction ? `<p class="strategy-instruction">${instruction}</p>` : ''}
+      <p class="strategy-text">${text}</p>`;
     return d;
   }
   // Build a math card element.
@@ -210,7 +226,7 @@
       const block = document.createElement('div');
       block.className = 'step-block';
       block.id = `learn-step-${stepIndex}`;
-      block.appendChild(strategyCard(steps[stepIndex].strategy));
+      block.appendChild(strategyCard(steps[stepIndex].strategy, stepIndex));
       revealList.appendChild(block);
       block.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       learnState.phase = 'math';
@@ -302,10 +318,10 @@
     const result = converter.compute(check.values.sourceValue, check.values);
 
     checkRevealList.innerHTML = '';
-    result.steps.forEach(step => {
+    result.steps.forEach((step, i) => {
       const block = document.createElement('div');
       block.className = 'step-block';
-      block.appendChild(strategyCard(step.strategy));
+      block.appendChild(strategyCard(step.strategy, i));
       block.appendChild(mathCard(step.math));
       checkRevealList.appendChild(block);
     });
