@@ -279,6 +279,80 @@
   }
 
   /* =============================================================
+     CHECK-MODE WORKSHEET
+     Short bold titles for each of the three working steps, keyed by
+     "from|to". These are presentation labels only (the chemistry and
+     the numbers live in chemistry.js); they head each numbered step
+     in the redesigned Check-my-answers worksheet.
+     ============================================================= */
+  const STEP_TITLES = {
+    'molarity|molality':          ['Moles of solute in 1 L', 'Mass of solvent', 'Molality'],
+    'molarity|mass_percent':      ['Moles of solute in 1 L', 'Mass of solute and solution', 'Percentage by mass'],
+    'molarity|mole_fraction':     ['Moles of solute in 1 L', 'Moles of solvent', 'Mole fraction'],
+    'molarity|volume_percent':    ['Moles of solute in 1 L', 'Volume of solute', 'Percentage by volume'],
+    'molality|molarity':          ['Moles of solute per kg solvent', 'Volume of solution', 'Molarity'],
+    'molality|mass_percent':      ['Moles of solute per kg solvent', 'Mass of solute and solution', 'Percentage by mass'],
+    'molality|mole_fraction':     ['Moles of solute per kg solvent', 'Moles of solvent', 'Mole fraction'],
+    'molality|volume_percent':    ['Moles of solute per kg solvent', 'Volume of solute and solvent', 'Percentage by volume'],
+    'mass_percent|molarity':      ['Mass of solute in 100 g', 'Moles of solute and volume', 'Molarity'],
+    'mass_percent|molality':      ['Masses in 100 g of solution', 'Moles of solute', 'Molality'],
+    'mass_percent|mole_fraction': ['Masses in 100 g of solution', 'Moles of each', 'Mole fraction'],
+    'mass_percent|volume_percent':['Masses in 100 g of solution', 'Volume of each', 'Percentage by volume'],
+    'volume_percent|molarity':    ['Volume of solute in 100 mL', 'Mass, then moles of solute', 'Molarity'],
+    'volume_percent|molality':    ['Volumes in 100 mL of solution', 'Masses, then moles', 'Molality'],
+    'volume_percent|mass_percent':['Volumes in 100 mL of solution', 'Mass of each', 'Percentage by mass'],
+    'volume_percent|mole_fraction':['Volumes in 100 mL of solution', 'Moles of each', 'Mole fraction'],
+    'mole_fraction|molarity':     ['Moles in 1 mol total', 'Mass, then volume of solution', 'Molarity'],
+    'mole_fraction|molality':     ['Moles in 1 mol total', 'Mass of solvent', 'Molality'],
+    'mole_fraction|mass_percent': ['Moles in 1 mol total', 'Mass of each', 'Percentage by mass'],
+    'mole_fraction|volume_percent':['Moles in 1 mol total', 'Volume of each', 'Percentage by volume']
+  };
+
+  // Build the redesigned worksheet card: a deep-teal result header,
+  // then the numbered step-by-step working, then the one-line formula.
+  function renderWorksheet(fromId, toId, result) {
+    const target = MEASURES[toId];
+    const key = `${fromId}|${toId}`;
+    const titles = STEP_TITLES[key] || [];
+    const converter = getConverter(fromId, toId);
+    // mole fraction has no unit — show just the number
+    const unit = target.unit === '' ? '' : target.symbol;
+
+    const stepsHtml = result.steps.map((step, i) => `
+      <li class="worksheet-step">
+        <span class="worksheet-step-num">${i + 1}</span>
+        <div class="worksheet-step-main">
+          ${titles[i] ? `<p class="worksheet-step-title">${titles[i]}</p>` : ''}
+          <div class="worksheet-step-math">${step.math}</div>
+          ${step.strategy ? `<p class="worksheet-step-note">${step.strategy}</p>` : ''}
+        </div>
+      </li>`).join('');
+
+    const oneLineHtml = (converter && converter.oneLine)
+      ? `<div class="worksheet-oneline">
+           <span class="worksheet-oneline-label">In one line:</span>
+           <span class="worksheet-oneline-formula">${target.formulaSymbol} = ${converter.oneLine}</span>
+         </div>`
+      : '';
+
+    const card = document.createElement('div');
+    card.className = 'worksheet';
+    card.innerHTML = `
+      <div class="worksheet-header">
+        <span class="worksheet-eyebrow">${target.name}</span>
+        <p class="worksheet-result">
+          <span class="worksheet-num">${fmt(result.answer)}</span>${unit ? `<span class="worksheet-unit">${unit}</span>` : ''}
+        </p>
+      </div>
+      <div class="worksheet-body">
+        <span class="worksheet-section">Step-by-step working</span>
+        <ol class="worksheet-steps">${stepsHtml}</ol>
+        ${oneLineHtml}
+      </div>`;
+    return card;
+  }
+
+  /* =============================================================
      LEARN MODE
      A single-card-at-a-time wizard: three prompt cards (target,
      source, fields) pan through in sequence, each with a Back
@@ -486,14 +560,7 @@
     const result = converter.compute(check.values.sourceValue, check.values);
 
     checkRevealList.innerHTML = '';
-    result.steps.forEach((step, i) => {
-      const block = document.createElement('div');
-      block.className = 'step-block';
-      block.appendChild(strategyCard(step.strategy, i));
-      block.appendChild(mathCard(step.math));
-      checkRevealList.appendChild(block);
-    });
-    checkRevealList.appendChild(answerCallout(result.answerText));
+    checkRevealList.appendChild(renderWorksheet(from, to, result));
     checkSolution.hidden = false;
     checkSolution.scrollIntoView({ behavior: 'smooth', block: 'start' });
   });

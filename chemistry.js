@@ -20,23 +20,23 @@
 /* ---------- the five measures ---------- */
 const MEASURES = {
   molarity: {
-    id: 'molarity', name: 'Molarity', symbol: 'M', unit: 'mol dm⁻³',
+    id: 'molarity', name: 'Molarity', symbol: 'M', unit: 'mol dm⁻³', formulaSymbol: 'M',
     valueLabel: 'Molarity', min: 0, max: Infinity, rangeHint: 'a value greater than 0'
   },
   molality: {
-    id: 'molality', name: 'Molality', symbol: 'm', unit: 'mol kg⁻¹',
+    id: 'molality', name: 'Molality', symbol: 'm', unit: 'mol kg⁻¹', formulaSymbol: 'm',
     valueLabel: 'Molality', min: 0, max: Infinity, rangeHint: 'a value greater than 0'
   },
   mass_percent: {
-    id: 'mass_percent', name: 'Percentage by mass', symbol: '% (w/w)', unit: '%',
+    id: 'mass_percent', name: 'Percentage by mass', symbol: '% (w/w)', unit: '%', formulaSymbol: 'P<sub>m</sub>',
     valueLabel: 'Percentage by mass', min: 0, max: 100, rangeHint: 'a value between 0 and 100'
   },
   volume_percent: {
-    id: 'volume_percent', name: 'Percentage by volume', symbol: '% (v/v)', unit: '%',
+    id: 'volume_percent', name: 'Percentage by volume', symbol: '% (v/v)', unit: '%', formulaSymbol: 'P<sub>v</sub>',
     valueLabel: 'Percentage by volume', min: 0, max: 100, rangeHint: 'a value between 0 and 100'
   },
   mole_fraction: {
-    id: 'mole_fraction', name: 'Mole fraction', symbol: 'x', unit: '',
+    id: 'mole_fraction', name: 'Mole fraction', symbol: 'x', unit: '', formulaSymbol: 'x',
     valueLabel: 'Mole fraction of solute', min: 0, max: 1, rangeHint: 'a value between 0 and 1'
   }
 };
@@ -87,6 +87,7 @@ const CONVERTERS = {
   /* ---------- FROM MOLARITY (basis: 1 L = 1000 mL of solution) ---------- */
   'molarity|molality': {
     requires: ['Ms', 'd'],
+    oneLine: frac('1000 · M', '1000 · ρ − M · M(solute)'),
     compute: (v, p) => {
       const massSol = 1000 * p.d;            // g of solution in 1 L
       const massSolute = v * p.Ms;           // g of solute
@@ -108,6 +109,7 @@ const CONVERTERS = {
 
   'molarity|mass_percent': {
     requires: ['Ms', 'd'],
+    oneLine: frac('M · M(solute)', '10 · ρ'),
     compute: (v, p) => {
       const massSol = 1000 * p.d;
       const massSolute = v * p.Ms;
@@ -128,6 +130,7 @@ const CONVERTERS = {
 
   'molarity|mole_fraction': {
     requires: ['Ms', 'Mv', 'd'],
+    oneLine: frac('M · M(solvent)', 'M · M(solvent) + 1000 · ρ − M · M(solute)'),
     compute: (v, p) => {
       const massSol = 1000 * p.d;
       const massSolute = v * p.Ms;
@@ -150,6 +153,7 @@ const CONVERTERS = {
 
   'molarity|volume_percent': {
     requires: ['Ms', 'ds'],
+    oneLine: frac('M · M(solute)', '10 · ρ(solute)'),
     compute: (v, p) => {
       const massSolute = v * p.Ms;
       const volSolute = massSolute / p.ds;      // mL, within the 1000 mL basis
@@ -171,6 +175,7 @@ const CONVERTERS = {
   /* ---------- FROM MOLALITY (basis: 1 kg = 1000 g of solvent) ---------- */
   'molality|molarity': {
     requires: ['Ms', 'd'],
+    oneLine: frac('1000 · m · ρ', '1000 + m · M(solute)'),
     compute: (v, p) => {
       const massSolute = v * p.Ms;
       const massSol = 1000 + massSolute;
@@ -192,6 +197,7 @@ const CONVERTERS = {
 
   'molality|mass_percent': {
     requires: ['Ms'],
+    oneLine: frac('100 · m · M(solute)', '1000 + m · M(solute)'),
     compute: (v, p) => {
       const massSolute = v * p.Ms;
       const massSol = 1000 + massSolute;
@@ -212,6 +218,7 @@ const CONVERTERS = {
 
   'molality|mole_fraction': {
     requires: ['Mv'],
+    oneLine: frac('m · M(solvent)', 'm · M(solvent) + 1000'),
     compute: (v, p) => {
       const nSolvent = 1000 / p.Mv;
       const ans = v / (v + nSolvent);
@@ -231,6 +238,7 @@ const CONVERTERS = {
 
   'molality|volume_percent': {
     requires: ['Ms', 'ds', 'dv'],
+    oneLine: frac('100 · m · M(solute) · ρ(solvent)', 'm · M(solute) · ρ(solvent) + 1000 · ρ(solute)'),
     compute: (v, p) => {
       const massSolute = v * p.Ms;
       const volSolute = massSolute / p.ds;
@@ -253,6 +261,7 @@ const CONVERTERS = {
   /* ---------- FROM PERCENTAGE BY MASS (basis: 100 g of solution) ---------- */
   'mass_percent|molarity': {
     requires: ['Ms', 'd'],
+    oneLine: frac('10 · P<sub>m</sub> · ρ', 'M(solute)'),
     compute: (v, p) => {
       const massSolute = v;                    // g in 100 g solution
       const nSolute = massSolute / p.Ms;
@@ -274,6 +283,7 @@ const CONVERTERS = {
 
   'mass_percent|molality': {
     requires: ['Ms'],
+    oneLine: frac('1000 · P<sub>m</sub>', 'M(solute) · (100 − P<sub>m</sub>)'),
     compute: (v, p) => {
       const massSolute = v;
       const massSolvent = 100 - v;
@@ -295,6 +305,7 @@ const CONVERTERS = {
 
   'mass_percent|mole_fraction': {
     requires: ['Ms', 'Mv'],
+    oneLine: frac('P<sub>m</sub> · M(solvent)', 'P<sub>m</sub> · M(solvent) + (100 − P<sub>m</sub>) · M(solute)'),
     compute: (v, p) => {
       const nSolute = v / p.Ms;
       const nSolvent = (100 - v) / p.Mv;
@@ -315,6 +326,7 @@ const CONVERTERS = {
 
   'mass_percent|volume_percent': {
     requires: ['ds', 'dv'],
+    oneLine: frac('100 · P<sub>m</sub> · ρ(solvent)', 'P<sub>m</sub> · ρ(solvent) + (100 − P<sub>m</sub>) · ρ(solute)'),
     compute: (v, p) => {
       const volSolute = v / p.ds;
       const volSolvent = (100 - v) / p.dv;
@@ -336,6 +348,7 @@ const CONVERTERS = {
   /* ---------- FROM PERCENTAGE BY VOLUME (basis: 100 mL of solution) ---------- */
   'volume_percent|molarity': {
     requires: ['ds', 'Ms'],
+    oneLine: frac('10 · P<sub>v</sub> · ρ(solute)', 'M(solute)'),
     compute: (v, p) => {
       const volSolute = v;                     // mL in 100 mL solution
       const massSolute = volSolute * p.ds;
@@ -357,6 +370,7 @@ const CONVERTERS = {
 
   'volume_percent|molality': {
     requires: ['ds', 'dv', 'Ms'],
+    oneLine: frac('1000 · P<sub>v</sub> · ρ(solute)', 'M(solute) · (100 − P<sub>v</sub>) · ρ(solvent)'),
     compute: (v, p) => {
       const massSolute = v * p.ds;
       const massSolvent = (100 - v) * p.dv;
@@ -378,6 +392,7 @@ const CONVERTERS = {
 
   'volume_percent|mass_percent': {
     requires: ['ds', 'dv'],
+    oneLine: frac('100 · P<sub>v</sub> · ρ(solute)', 'P<sub>v</sub> · ρ(solute) + (100 − P<sub>v</sub>) · ρ(solvent)'),
     compute: (v, p) => {
       const massSolute = v * p.ds;
       const massSolvent = (100 - v) * p.dv;
@@ -398,6 +413,7 @@ const CONVERTERS = {
 
   'volume_percent|mole_fraction': {
     requires: ['ds', 'dv', 'Ms', 'Mv'],
+    oneLine: frac('P<sub>v</sub> · ρ(solute) · M(solvent)', 'P<sub>v</sub> · ρ(solute) · M(solvent) + (100 − P<sub>v</sub>) · ρ(solvent) · M(solute)'),
     compute: (v, p) => {
       const nSolute = (v * p.ds) / p.Ms;
       const nSolvent = ((100 - v) * p.dv) / p.Mv;
@@ -419,6 +435,7 @@ const CONVERTERS = {
   /* ---------- FROM MOLE FRACTION (basis: 1 mol of solution total) ---------- */
   'mole_fraction|molarity': {
     requires: ['Ms', 'Mv', 'd'],
+    oneLine: frac('1000 · x · ρ', 'x · M(solute) + (1 − x) · M(solvent)'),
     compute: (v, p) => {
       const nSolute = v, nSolvent = 1 - v;
       const massSol = nSolute * p.Ms + nSolvent * p.Mv;
@@ -440,6 +457,7 @@ const CONVERTERS = {
 
   'mole_fraction|molality': {
     requires: ['Mv'],
+    oneLine: frac('1000 · x', '(1 − x) · M(solvent)'),
     compute: (v, p) => {
       const nSolute = v, nSolvent = 1 - v;
       const massSolvent = nSolvent * p.Mv;
@@ -460,6 +478,7 @@ const CONVERTERS = {
 
   'mole_fraction|mass_percent': {
     requires: ['Ms', 'Mv'],
+    oneLine: frac('100 · x · M(solute)', 'x · M(solute) + (1 − x) · M(solvent)'),
     compute: (v, p) => {
       const massSolute = v * p.Ms;
       const massSolvent = (1 - v) * p.Mv;
@@ -480,6 +499,7 @@ const CONVERTERS = {
 
   'mole_fraction|volume_percent': {
     requires: ['Ms', 'Mv', 'ds', 'dv'],
+    oneLine: frac('100 · x · M(solute) · ρ(solvent)', 'x · M(solute) · ρ(solvent) + (1 − x) · M(solvent) · ρ(solute)'),
     compute: (v, p) => {
       const volSolute = (v * p.Ms) / p.ds;
       const volSolvent = ((1 - v) * p.Mv) / p.dv;

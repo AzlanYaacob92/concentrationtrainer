@@ -442,6 +442,155 @@ main { max-width: 760px; margin: 0 auto; padding: 8px 24px 0; }
 #learn-full-working #learn-restart { margin-top: 4px; }
 
 
+/* ============================================================
+   CHECK BRANCH — step-by-step worksheet card
+   Deep-teal result header, cream body with amber-numbered steps,
+   and a compact one-line formula in the footer. This is the
+   original "worked solution" look, restored for Check mode.
+   ============================================================ */
+.worksheet {
+  width: 100%;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 14px 40px rgba(19, 78, 74, .16);
+  background: #f6f2ea;
+  border: 1px solid var(--line);
+  animation: fade .7s var(--ease-buttery);
+}
+
+/* result header */
+.worksheet-header {
+  background: var(--teal-900);
+  padding: 22px 30px 20px;
+}
+.worksheet-eyebrow {
+  display: block;
+  font-family: var(--body);
+  font-size: .72rem;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: rgba(238, 250, 248, .72);
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+.worksheet-result {
+  margin: 0;
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px;
+  color: #fff;
+}
+.worksheet-num {
+  font-family: var(--display);
+  font-size: clamp(2rem, 6vw, 2.5rem);
+  font-weight: 700;
+  letter-spacing: -.01em;
+  line-height: 1.05;
+}
+.worksheet-unit {
+  font-family: var(--display);
+  font-size: 1.05rem;
+  color: rgba(238, 250, 248, .85);
+}
+
+/* body */
+.worksheet-body { padding: 22px 30px 26px; }
+.worksheet-section {
+  display: block;
+  font-family: var(--body);
+  font-size: .72rem;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--teal-700);
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+
+/* numbered steps */
+.worksheet-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.worksheet-step {
+  display: flex;
+  gap: 16px;
+  padding: 16px 0;
+  border-top: 1px solid var(--line);
+}
+.worksheet-step:first-child { border-top: none; padding-top: 4px; }
+.worksheet-step-num {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  margin-top: 2px;
+  border-radius: 50%;
+  background: var(--amber-100);
+  color: var(--amber-600);
+  font-family: var(--body);
+  font-size: .82rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.worksheet-step-main { min-width: 0; flex: 1; }
+.worksheet-step-title {
+  margin: 0 0 6px;
+  font-family: var(--display);
+  font-size: 1.02rem;
+  font-weight: 700;
+  color: var(--teal-900);
+}
+.worksheet-step-math {
+  font-family: var(--display);
+  font-size: 1.05rem;
+  color: var(--ink);
+  line-height: 1.95;
+  overflow-x: auto;
+}
+.worksheet-step-math b { font-weight: 700; }
+.worksheet-step-note {
+  margin: 8px 0 0;
+  font-family: var(--display);
+  font-style: italic;
+  font-size: .92rem;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+/* one-line formula footer */
+.worksheet-oneline {
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px dashed var(--line);
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-family: var(--display);
+  color: var(--ink);
+  overflow-x: auto;
+}
+.worksheet-oneline-label {
+  font-family: var(--display);
+  font-style: italic;
+  color: var(--muted);
+  font-size: .98rem;
+}
+.worksheet-oneline-formula {
+  font-family: var(--display);
+  font-size: 1.08rem;
+  color: var(--teal-900);
+}
+.worksheet-oneline-formula sub { font-size: .72em; }
+
+@media (max-width: 560px) {
+  .worksheet-header { padding: 18px 20px 16px; }
+  .worksheet-body { padding: 18px 20px 22px; }
+}
+
 /* ---------- accessibility: respect reduced motion ---------- */
 @media (prefers-reduced-motion: reduce) {
   *, .screen.is-active, .step-block, .math-card, .answer-callout,
