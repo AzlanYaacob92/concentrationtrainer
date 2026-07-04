@@ -308,6 +308,74 @@
     'mole_fraction|volume_percent':['Moles in 1 mol total', 'Volume of each', 'Percentage by volume']
   };
 
+  // Split one equation on the '=' signs that sit OUTSIDE any HTML tag, so
+  // markup like class="frac" is never split. Returns trimmed segments.
+  function splitTopLevelEquals(line) {
+    const parts = [];
+    let depth = 0, cur = '';
+    for (let i = 0; i < line.length; i++) {
+      const c = line[i];
+      if (c === '<') depth++;
+      else if (c === '>') depth = Math.max(0, depth - 1);
+      if (c === '=' && depth === 0) { parts.push(cur); cur = ''; }
+      else cur += c;
+    }
+    parts.push(cur);
+    return parts.map(s => s.trim());
+  }
+
+  // Lay a math string out so every '=' stacks in its own column. Each
+  // <br>-separated equation becomes a grid row; the label (left of the first
+  // '=') is right-aligned to hug the '=', results are left-aligned.
+  function mathGrid(html) {
+    const lines = String(html).split(/<br\s*\/?>/i);
+    const rows = lines.map(splitTopLevelEquals);
+    const maxSegs = Math.max(1, ...rows.map(r => r.length));
+    const cols = 2 * maxSegs - 1;
+    let cells = '';
+    rows.forEach((segs, ri) => {
+      const multi = segs.length > 1;
+      segs.forEach((seg, si) => {
+        if (si > 0) {
+          cells += `<span class="eq-op" style="grid-column:${2 * si};grid-row:${ri + 1}">=</span>`;
+        }
+        const cls = !multi ? 'eq-solo' : (si === 0 ? 'eq-lhs' : 'eq-rhs');
+        cells += `<span class="eq-seg ${cls}" style="grid-column:${2 * si + 1};grid-row:${ri + 1}">${seg}</span>`;
+      });
+    });
+    return `<span class="eqgrid" style="grid-template-columns:repeat(${cols}, auto)">${cells}</span>`;
+  }
+
+  // Render a math grid into an element, revealing its equation rows with a
+  // gentle stagger (the calculation "reveal" for the Learn combo card).
+  function revealMathGrid(el, html) {
+    el.innerHTML = mathGrid(html);
+    if (prefersReducedMotion) return;
+    try {
+      const grid = el.querySelector('.eqgrid');
+      if (!grid) return;
+      const byRow = new Map();
+      Array.from(grid.children).forEach(c => {
+        const r = c.style.gridRow || '1';
+        if (!byRow.has(r)) byRow.set(r, []);
+        byRow.get(r).push(c);
+      });
+      let delay = 0;
+      byRow.forEach(rowCells => {
+        rowCells.forEach(c => {
+          c.style.opacity = '0';
+          c.style.transform = 'translateY(4px)';
+          c.style.transition = 'opacity .28s var(--ease-buttery), transform .28s var(--ease-buttery)';
+        });
+        setTimeout(() => rowCells.forEach(c => {
+          c.style.opacity = '1';
+          c.style.transform = 'none';
+        }), delay);
+        delay += 150;
+      });
+    } catch (e) { /* content already shown; animation is best-effort */ }
+  }
+
   // Build the redesigned worksheet card: a deep-teal result header,
   // then the numbered step-by-step working, then the one-line formula.
   function renderWorksheet(fromId, toId, result) {
@@ -323,7 +391,7 @@
         <span class="worksheet-step-num">${i + 1}</span>
         <div class="worksheet-step-main">
           ${titles[i] ? `<p class="worksheet-step-title">${titles[i]}</p>` : ''}
-          <div class="worksheet-step-math">${step.math}</div>
+          <div class="worksheet-step-math">${mathGrid(step.math)}</div>
           ${step.strategy ? `<p class="worksheet-step-note">${step.strategy}</p>` : ''}
         </div>
       </li>`).join('');
@@ -395,10 +463,10 @@
 
   // One "pure working" card — calculation only, no strategy — used
   // in the final overall-working summary.
-  function pureWorkingCard(html) {
+  function pureWorkingCard(html, grid) {
     const d = document.createElement('div');
     d.className = 'full-working-item';
-    d.innerHTML = html;
+    d.innerHTML = grid ? mathGrid(html) : html;
     return d;
   }
 
@@ -470,8 +538,8 @@
     const { steps, stepIndex, calcShown } = learnState;
 
     if (!calcShown) {
-      // type the calculation into the same card — no pan for this part
-      typewriterReveal(comboMath, steps[stepIndex].math);
+      // reveal the calculation as a stacked-equation grid in the same card
+      revealMathGrid(comboMath, steps[stepIndex].math);
       learnState.calcShown = true;
       const isLast = stepIndex === steps.length - 1;
       comboNextBtn.textContent = isLast ? 'Reveal final answer' : 'Reveal next step';
@@ -494,9 +562,9 @@
   revealWorkingBtn.addEventListener('click', () => {
     if (!learnState) return;
     fullWorkingList.innerHTML = '';
-    learnState.steps.forEach(step => fullWorkingList.appendChild(pureWorkingCard(step.math)));
+    learnState.steps.forEach(step => fullWorkingList.appendChild(pureWorkingCard(step.math, true)));
     fullWorkingList.appendChild(pureWorkingCard(
-      `<span class="full-working-answer-label">Final answer</span>${learnState.answerText}`
+      `<span class="full-working-answer-label">Final answer</span>${learnState.answerText}`, false
     ));
     panTransition(answerCard, fullWorkingCard, 'forward');
   });

@@ -28,11 +28,11 @@ const MEASURES = {
     valueLabel: 'Molality', min: 0, max: Infinity, rangeHint: 'a value greater than 0'
   },
   mass_percent: {
-    id: 'mass_percent', name: 'Percentage by mass', symbol: '% (w/w)', unit: '%', formulaSymbol: 'P<sub>m</sub>',
+    id: 'mass_percent', name: 'Percentage by mass', symbol: '% w/w', unit: '%', formulaSymbol: 'P<sub>m</sub>',
     valueLabel: 'Percentage by mass', min: 0, max: 100, rangeHint: 'a value between 0 and 100'
   },
   volume_percent: {
-    id: 'volume_percent', name: 'Percentage by volume', symbol: '% (v/v)', unit: '%', formulaSymbol: 'P<sub>v</sub>',
+    id: 'volume_percent', name: 'Percentage by volume', symbol: '% v/v', unit: '%', formulaSymbol: 'P<sub>v</sub>',
     valueLabel: 'Percentage by volume', min: 0, max: 100, rangeHint: 'a value between 0 and 100'
   },
   mole_fraction: {
@@ -122,7 +122,7 @@ const CONVERTERS = {
           { strategy: 'Find the mass of solute (moles × molar mass) and the mass of the whole solution (volume × density).',
             math: `mass(solute) = ${fmt(v)} × ${fmt(p.Ms)} = ${fmt(massSolute)} g<br>mass(solution) = 1000 × ${fmt(p.d)} = ${fmt(massSol)} g` },
           { strategy: 'Percentage by mass = mass of solute ÷ mass of solution × 100.',
-            math: `%(w/w) = ${frac(fmt(massSolute), fmt(massSol))} × 100 = ${fmt(ans)} %` }
+            math: `% w/w = ${frac(fmt(massSolute), fmt(massSol))} × 100 = ${fmt(ans)} %` }
         ]
       };
     }
@@ -166,7 +166,7 @@ const CONVERTERS = {
           { strategy: 'Find the mass of solute, then convert to a volume using the solute’s own density.',
             math: `mass(solute) = ${fmt(v)} × ${fmt(p.Ms)} = ${fmt(massSolute)} g<br>V(solute) = ${frac(fmt(massSolute), fmt(p.ds))} = ${fmt(volSolute)} mL` },
           { strategy: 'Percentage by volume = volume of solute ÷ volume of solution × 100.',
-            math: `%(v/v) = ${frac(fmt(volSolute), '1000')} × 100 = ${fmt(ans)} %` }
+            math: `% v/v = ${frac(fmt(volSolute), '1000')} × 100 = ${fmt(ans)} %` }
         ]
       };
     }
@@ -210,7 +210,7 @@ const CONVERTERS = {
           { strategy: 'Find the mass of solute, then the mass of the whole solution.',
             math: `mass(solute) = ${fmt(v)} × ${fmt(p.Ms)} = ${fmt(massSolute)} g<br>mass(solution) = 1000 + ${fmt(massSolute)} = ${fmt(massSol)} g` },
           { strategy: 'Percentage by mass = mass of solute ÷ mass of solution × 100.',
-            math: `%(w/w) = ${frac(fmt(massSolute), fmt(massSol))} × 100 = ${fmt(ans)} %` }
+            math: `% w/w = ${frac(fmt(massSolute), fmt(massSol))} × 100 = ${fmt(ans)} %` }
         ]
       };
     }
@@ -252,7 +252,7 @@ const CONVERTERS = {
           { strategy: 'Convert the solute to a volume (via its mass and density), and convert the 1000 g of solvent to a volume too.',
             math: `mass(solute) = ${fmt(v)} × ${fmt(p.Ms)} = ${fmt(massSolute)} g<br>V(solute) = ${frac(fmt(massSolute), fmt(p.ds))} = ${fmt(volSolute)} mL<br>V(solvent) = ${frac('1000', fmt(p.dv))} = ${fmt(volSolvent)} mL` },
           { strategy: 'Percentage by volume = volume of solute ÷ total volume × 100.',
-            math: `%(v/v) = ${frac(fmt(volSolute), fmt(volSolute) + ' + ' + fmt(volSolvent))} × 100 = ${fmt(ans)} %` }
+            math: `% v/v = ${frac(fmt(volSolute), fmt(volSolute) + ' + ' + fmt(volSolvent))} × 100 = ${fmt(ans)} %` }
         ]
       };
     }
@@ -339,7 +339,7 @@ const CONVERTERS = {
           { strategy: 'Convert each mass to a volume using its own density.',
             math: `V(solute) = ${frac(fmt(v), fmt(p.ds))} = ${fmt(volSolute)} mL<br>V(solvent) = ${frac(fmt(100 - v), fmt(p.dv))} = ${fmt(volSolvent)} mL` },
           { strategy: 'Percentage by volume = volume of solute ÷ total volume × 100.',
-            math: `%(v/v) = ${frac(fmt(volSolute), fmt(volSolute) + ' + ' + fmt(volSolvent))} × 100 = ${fmt(ans)} %` }
+            math: `% v/v = ${frac(fmt(volSolute), fmt(volSolute) + ' + ' + fmt(volSolvent))} × 100 = ${fmt(ans)} %` }
         ]
       };
     }
@@ -405,7 +405,7 @@ const CONVERTERS = {
           { strategy: 'Convert each volume to a mass using its density.',
             math: `mass(solute) = ${fmt(v)} × ${fmt(p.ds)} = ${fmt(massSolute)} g<br>mass(solvent) = ${fmt(100 - v)} × ${fmt(p.dv)} = ${fmt(massSolvent)} g` },
           { strategy: 'Percentage by mass = mass of solute ÷ total mass × 100.',
-            math: `%(w/w) = ${frac(fmt(massSolute), fmt(massSolute) + ' + ' + fmt(massSolvent))} × 100 = ${fmt(ans)} %` }
+            math: `% w/w = ${frac(fmt(massSolute), fmt(massSolute) + ' + ' + fmt(massSolvent))} × 100 = ${fmt(ans)} %` }
         ]
       };
     }
@@ -491,7 +491,7 @@ const CONVERTERS = {
           { strategy: 'Convert each to a mass using its molar mass.',
             math: `mass(solute) = ${fmt(v)} × ${fmt(p.Ms)} = ${fmt(massSolute)} g<br>mass(solvent) = ${fmt(1 - v)} × ${fmt(p.Mv)} = ${fmt(massSolvent)} g` },
           { strategy: 'Percentage by mass = mass of solute ÷ total mass × 100.',
-            math: `%(w/w) = ${frac(fmt(massSolute), fmt(massSolute) + ' + ' + fmt(massSolvent))} × 100 = ${fmt(ans)} %` }
+            math: `% w/w = ${frac(fmt(massSolute), fmt(massSolute) + ' + ' + fmt(massSolvent))} × 100 = ${fmt(ans)} %` }
         ]
       };
     }
@@ -512,7 +512,7 @@ const CONVERTERS = {
           { strategy: 'Convert each to a volume: moles → mass (molar mass) → volume (density).',
             math: `V(solute) = ${frac(fmt(v) + ' × ' + fmt(p.Ms), fmt(p.ds))} = ${fmt(volSolute)} mL<br>V(solvent) = ${frac(fmt(1 - v) + ' × ' + fmt(p.Mv), fmt(p.dv))} = ${fmt(volSolvent)} mL` },
           { strategy: 'Percentage by volume = volume of solute ÷ total volume × 100.',
-            math: `%(v/v) = ${frac(fmt(volSolute), fmt(volSolute) + ' + ' + fmt(volSolvent))} × 100 = ${fmt(ans)} %` }
+            math: `% v/v = ${frac(fmt(volSolute), fmt(volSolute) + ' + ' + fmt(volSolvent))} × 100 = ${fmt(ans)} %` }
         ]
       };
     }
