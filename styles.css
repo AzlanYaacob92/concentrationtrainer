@@ -5,6 +5,7 @@
 
 :root {
   --teal-900: #134e4a;
+  --teal-950: #0a2e2b;
   --teal-700: #0f766e;
   --teal-600: #0d9488;
   --teal-100: #cce9e5;
@@ -80,6 +81,31 @@ main { max-width: 760px; margin: 0 auto; padding: 8px 24px 0; }
 .screen { display: none; }
 .screen.is-active { display: block; animation: fade .65s var(--ease-buttery); }
 @keyframes fade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+/* ---------- wizard pan transitions (Learn branch) ----------
+   One card visible at a time. "forward" exits left / enters from
+   the right (the normal progress direction); "back" reverses it. */
+@keyframes pan-in-right  { from { opacity: 0; transform: translateX(56px); } to { opacity: 1; transform: none; } }
+@keyframes pan-in-left   { from { opacity: 0; transform: translateX(-56px); } to { opacity: 1; transform: none; } }
+@keyframes pan-out-left  { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateX(-56px); } }
+@keyframes pan-out-right { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateX(56px); } }
+
+.wizard-card { will-change: transform, opacity; }
+.anim-pan-in-right  { animation: pan-in-right .65s var(--ease-buttery); }
+.anim-pan-in-left   { animation: pan-in-left .65s var(--ease-buttery); }
+.anim-pan-out-left  { animation: pan-out-left .5s var(--ease-buttery) forwards; }
+.anim-pan-out-right { animation: pan-out-right .5s var(--ease-buttery) forwards; }
+
+.wizard-back-row { margin-top: 18px; }
+.wizard-back { padding: 8px 16px; font-size: .9rem; }
+
+/* ---------- landing entrance ---------- */
+.hero-lead.anim-hero-in { animation: pan-in-right .7s var(--ease-buttery) both; }
+
+.choice-card.anim-grow-in { animation: grow-in .55s var(--ease-buttery) both; }
+@keyframes grow-in { from { opacity: 0; transform: scale(.35); } to { opacity: 1; transform: scale(1); } }
+
+.landing-content.anim-landing-out { animation: pan-out-left .5s var(--ease-buttery) forwards; }
 
 /* ---------- landing ---------- */
 .hero-lead {
@@ -322,6 +348,98 @@ main { max-width: 760px; margin: 0 auto; padding: 8px 24px 0; }
 }
 
 .fineprint { color: var(--muted); font-size: .8rem; margin-top: 20px; font-family: var(--body); }
+
+/* ============================================================
+   LEARN BRANCH — combined strategy + calculation card
+   One rounded card, two zones: strategy in deep teal (dark, with
+   light text), calculation in white. Bigger type and padding than
+   the Check-mode cards, since this is the primary teaching surface.
+   ============================================================ */
+.step-combo {
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 14px 40px rgba(19, 78, 74, .18);
+  margin-bottom: 16px;
+}
+.step-strategy-zone {
+  background: var(--teal-900);
+  color: var(--teal-50);
+  padding: 30px 28px 26px;
+}
+.step-strategy-zone .strategy-eyebrow {
+  font-family: var(--body);
+  font-size: .72rem; letter-spacing: .13em; text-transform: uppercase;
+  color: var(--amber-500); font-weight: 700; display: block; margin-bottom: 10px;
+}
+.step-strategy-zone .strategy-instruction {
+  font-family: var(--display);
+  font-size: 1.3rem;
+  color: #fff;
+  margin: 0 0 8px;
+}
+.step-strategy-zone .strategy-text {
+  font-family: var(--display);
+  font-size: 1.1rem;
+  color: var(--teal-50);
+  opacity: .92;
+  margin: 0;
+}
+.step-calc-zone {
+  background: #fff;
+  color: var(--ink);
+  padding: 28px;
+  font-family: var(--display);
+  font-size: 1.2rem;
+  line-height: 2.1;
+  min-height: 56px;
+}
+.step-calc-zone .math-eyebrow {
+  font-family: var(--body);
+  font-size: .72rem; letter-spacing: .13em; text-transform: uppercase;
+  color: var(--amber-600); font-weight: 700; display: block; margin-bottom: 10px;
+}
+.math-typed { margin: 0; }
+.step-combo-actions { background: #fff; padding: 0 28px 28px; }
+.step-combo-actions .btn { font-size: 1.02rem; padding: 13px 24px; }
+
+/* ---------- final answer: bigger, deeper teal ---------- */
+.answer-callout--learn {
+  background: var(--teal-950);
+  border: none;
+  border-left: none;
+  border-radius: 20px;
+  padding: 38px 34px;
+  color: #fff;
+  box-shadow: 0 16px 44px rgba(10, 46, 43, .4);
+}
+.answer-callout--learn .answer-eyebrow { color: var(--amber-500); font-family: var(--body); }
+.answer-callout--learn .answer-value {
+  color: #fff;
+  font-size: 2.1rem;
+  font-family: var(--display);
+  margin-bottom: 20px;
+}
+.answer-callout--learn .btn--ghost { color: #fff; border-color: rgba(255, 255, 255, .35); }
+.answer-callout--learn .btn--ghost:hover { background: rgba(255, 255, 255, .14); transform: translateY(-1px); }
+
+/* ---------- pure working summary (calculation only, no strategy) ---------- */
+.full-working-item {
+  background: #fff;
+  border-radius: 14px;
+  padding: 22px 24px;
+  font-family: var(--display);
+  font-size: 1.1rem;
+  line-height: 1.95;
+  box-shadow: var(--shadow);
+  color: var(--ink);
+}
+.full-working-answer-label {
+  display: block;
+  font-family: var(--body);
+  font-size: .72rem; letter-spacing: .13em; text-transform: uppercase;
+  color: var(--amber-600); font-weight: 700; margin-bottom: 8px;
+}
+#learn-full-working #learn-restart { margin-top: 4px; }
 
 
 /* ---------- accessibility: respect reduced motion ---------- */

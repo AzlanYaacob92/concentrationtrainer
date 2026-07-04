@@ -7,19 +7,153 @@
 (function () {
   const { MEASURES, MEASURE_ORDER, FIELDS, getConverter, fmt } = window.CHEM;
 
+  /* ---------------- reduced motion ---------------- */
+  let prefersReducedMotion = false;
+  try {
+    prefersReducedMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  } catch (e) { /* matchMedia unavailable — treat as full motion */ }
+
+  /* ---------------- animation helpers ----------------
+     Every pan pairs a real CSS animation with a timed fallback, so
+     navigation never gets stuck — if the animation doesn't fire
+     (reduced motion, a hidden ancestor, a slow device), the
+     fallback timer moves things along anyway. */
+  function onAnimEnd(el, fallbackMs, cb) {
+    let done = false;
+    function finish() {
+      if (done) return;
+      done = true;
+      el.removeEventListener('animationend', onEnd);
+      clearTimeout(timer);
+      cb();
+    }
+    function onEnd(e) { if (e.target === el) finish(); }
+    el.addEventListener('animationend', onEnd);
+    const timer = setTimeout(finish, fallbackMs);
+  }
+
+  // Pan a card into view. direction 'forward' enters from the right
+  // (the normal progress direction); 'back' enters from the left.
+  function enterCard(el, direction) {
+    if (!el) return;
+    el.hidden = false;
+    if (prefersReducedMotion) return;
+    const cls = direction === 'back' ? 'anim-pan-in-left' : 'anim-pan-in-right';
+    el.classList.remove('anim-pan-in-left', 'anim-pan-in-right');
+    void el.offsetWidth; // force reflow so a repeated class name restarts the animation
+    el.classList.add(cls);
+    onAnimEnd(el, 700, () => el.classList.remove(cls));
+  }
+
+  // Pan a card out of view, then call back.
+  function exitCard(el, direction, cb) {
+    if (!el) { if (cb) cb(); return; }
+    if (prefersReducedMotion) { el.hidden = true; if (cb) cb(); return; }
+    const cls = direction === 'back' ? 'anim-pan-out-right' : 'anim-pan-out-left';
+    el.classList.remove('anim-pan-out-left', 'anim-pan-out-right');
+    void el.offsetWidth;
+    el.classList.add(cls);
+    onAnimEnd(el, 550, () => {
+      el.hidden = true;
+      el.classList.remove(cls);
+      if (cb) cb();
+    });
+  }
+
+  // The one wizard transition primitive used throughout: pan `fromEl`
+  // out (if there is one), run `updateFn` (e.g. fill in the next
+  // step's content — fromEl and toEl are often the same element,
+  // refreshed in place), then pan `toEl` in.
+  function panTransition(fromEl, toEl, direction, updateFn) {
+    function doEnter() {
+      if (updateFn) updateFn();
+      enterCard(toEl, direction);
+    }
+    if (fromEl) exitCard(fromEl, direction, doEnter);
+    else doEnter();
+  }
+
+  // Reveal an HTML string into `el` as if it were being typed —
+  // characters appear one at a time, but a whole <br> or a whole
+  // fraction (<span class="frac">…</span>) appears as one atomic
+  // unit instead of getting typed apart.
+  function typewriterReveal(el, html, speed) {
+    if (prefersReducedMotion) { el.innerHTML = html; return; }
+    speed = speed || 16;
+    const tokens = [];
+    let i = 0;
+    while (i < html.length) {
+      if (html.startsWith('<br>', i)) { tokens.push('<br>'); i += 4; continue; }
+      if (html.startsWith('<span class="frac">', i)) {
+        const closeAt = html.indexOf('</span></span>', i);
+        const end = closeAt === -1 ? html.length : closeAt + '</span></span>'.length;
+        tokens.push(html.slice(i, end));
+        i = end;
+        continue;
+      }
+      tokens.push(html[i]);
+      i += 1;
+    }
+    el.innerHTML = '';
+    let idx = 0;
+    (function step() {
+      if (idx >= tokens.length) return;
+      el.innerHTML += tokens[idx];
+      idx += 1;
+      setTimeout(step, speed);
+    })();
+  }
+
   /* ---------------- screen navigation ---------------- */
   const screens = {
     landing: document.getElementById('screen-landing'),
     learn: document.getElementById('screen-learn'),
     check: document.getElementById('screen-check')
   };
+  const landingContent = document.getElementById('landing-content');
 
-  function goto(name) {
+  // The landing choices grow in one at a time; the headline pans in
+  // from the right. Runs on first load and every time we come back.
+  function playLandingEntrance() {
+    if (prefersReducedMotion) return;
+    const hero = landingContent.querySelector('.hero-lead');
+    const cards = landingContent.querySelectorAll('.choice-card');
+    hero.classList.remove('anim-hero-in');
+    void hero.offsetWidth;
+    hero.classList.add('anim-hero-in');
+    cards.forEach((card, i) => {
+      card.classList.remove('anim-grow-in');
+      card.style.animationDelay = `${0.45 + i * 0.18}s`;
+      void card.offsetWidth;
+      card.classList.add('anim-grow-in');
+    });
+  }
+
+  function switchScreen(name) {
     Object.values(screens).forEach(s => s.classList.remove('is-active'));
     screens[name].classList.add('is-active');
     window.scrollTo({ top: 0, behavior: 'smooth' });
     if (name === 'learn') resetLearn();
     if (name === 'check') resetCheck();
+    if (name === 'landing') playLandingEntrance();
+  }
+
+  // Leaving the landing screen pans its whole content out to the
+  // left first; every other switch happens straight away (the
+  // target screen still fades in via .screen.is-active).
+  function goto(name) {
+    if (screens.landing.classList.contains('is-active') && name !== 'landing') {
+      if (prefersReducedMotion) { switchScreen(name); return; }
+      landingContent.classList.remove('anim-landing-out');
+      void landingContent.offsetWidth;
+      landingContent.classList.add('anim-landing-out');
+      onAnimEnd(landingContent, 500, () => {
+        landingContent.classList.remove('anim-landing-out');
+        switchScreen(name);
+      });
+    } else {
+      switchScreen(name);
+    }
   }
 
   document.querySelectorAll('[data-goto]').forEach(el => {
@@ -146,55 +280,100 @@
 
   /* =============================================================
      LEARN MODE
-     Two prompts (target, then source) -> fields -> progressive
-     click-to-reveal: strategy, then math, per step, then the
-     final answer callout at the end.
+     A single-card-at-a-time wizard: three prompt cards (target,
+     source, fields) pan through in sequence, each with a Back
+     button to the previous one. "Work it out" hands off to a
+     combined strategy+calculation card, one per step — the
+     calculation types itself in on demand. The last step hands
+     off to a big final-answer card, which can expand into a pure
+     working summary (calculations only, no strategy) at the end.
      ============================================================= */
   const learnTargetSel = document.getElementById('learn-target');
   const learnSourceSel = document.getElementById('learn-source');
+  const promptTarget = document.getElementById('learn-prompt-target');
   const promptSource = document.getElementById('learn-prompt-source');
   const fieldsCard = document.getElementById('learn-fields');
   const fieldsTitle = document.getElementById('learn-fields-title');
   const fieldList = document.getElementById('learn-field-list');
   const learnError = document.getElementById('learn-error');
   const learnStartBtn = document.getElementById('learn-start');
-  const solutionBox = document.getElementById('learn-solution');
-  const revealList = document.getElementById('learn-reveal-list');
-  const revealNextBtn = document.getElementById('learn-reveal-next');
+  const backTo1Btn = document.getElementById('learn-back-to-1');
+  const backTo2Btn = document.getElementById('learn-back-to-2');
+
+  const comboCard = document.getElementById('learn-combo');
+  const comboInstruction = document.getElementById('learn-combo-instruction');
+  const comboStrategy = document.getElementById('learn-combo-strategy');
+  const comboMath = document.getElementById('learn-combo-math');
+  const comboNextBtn = document.getElementById('learn-combo-next');
+
+  const answerCard = document.getElementById('learn-answer');
+  const answerValueEl = document.getElementById('learn-answer-value');
+  const revealWorkingBtn = document.getElementById('learn-reveal-working');
+
+  const fullWorkingCard = document.getElementById('learn-full-working');
+  const fullWorkingList = document.getElementById('learn-full-working-list');
   const restartBtn = document.getElementById('learn-restart');
 
+  const learnWizardCards = [promptTarget, promptSource, fieldsCard, comboCard, answerCard, fullWorkingCard];
+
   let learnInputs = [];
-  let learnState = null; // { steps, answerText, stepIndex, phase }
+  let learnState = null; // { steps, answerText, stepIndex, calcShown }
+
+  // One "pure working" card — calculation only, no strategy — used
+  // in the final overall-working summary.
+  function pureWorkingCard(html) {
+    const d = document.createElement('div');
+    d.className = 'full-working-item';
+    d.innerHTML = html;
+    return d;
+  }
 
   function resetLearn() {
     fillMeasureSelect(learnTargetSel, null, 'Choose what you want to find…');
-    promptSource.hidden = true;
-    fieldsCard.hidden = true;
-    solutionBox.hidden = true;
-    learnError.hidden = true;
-    revealList.innerHTML = '';
-    revealNextBtn.hidden = false;
-    restartBtn.hidden = true;
     learnSourceSel.innerHTML = '';
+    learnError.hidden = true;
+    learnState = null;
+
+    learnWizardCards.forEach(el => {
+      el.hidden = true;
+      el.classList.remove('anim-pan-in-left', 'anim-pan-in-right', 'anim-pan-out-left', 'anim-pan-out-right');
+    });
+    enterCard(promptTarget, 'forward');
   }
 
   learnTargetSel.addEventListener('change', () => {
     fillMeasureSelect(learnSourceSel, learnTargetSel.value, 'Choose what you already have…');
-    promptSource.hidden = false;
-    fieldsCard.hidden = true;
-    solutionBox.hidden = true;
+    panTransition(promptTarget, promptSource, 'forward');
+  });
+
+  backTo1Btn.addEventListener('click', () => {
+    panTransition(promptSource, promptTarget, 'back');
   });
 
   learnSourceSel.addEventListener('change', () => {
     const from = learnSourceSel.value, to = learnTargetSel.value;
     const converter = getConverter(from, to);
     if (!converter) return; // safety: shouldn't happen, all 20 pairs exist
-    fieldsTitle.textContent = `Convert ${MEASURES[from].name} → ${MEASURES[to].name}`;
+    fieldsTitle.textContent = `You are making a conversion between "${MEASURES[from].name}" to "${MEASURES[to].name}"`;
     learnInputs = renderFieldList(fieldList, from, converter.requires, 'learn');
-    fieldsCard.hidden = false;
-    solutionBox.hidden = true;
     learnError.hidden = true;
+    panTransition(promptSource, fieldsCard, 'forward');
   });
+
+  backTo2Btn.addEventListener('click', () => {
+    panTransition(fieldsCard, promptSource, 'back');
+  });
+
+  // Fill the combo card with a given step's strategy, and clear its
+  // calculation zone ready for the next reveal.
+  function renderComboStep() {
+    const { steps, stepIndex } = learnState;
+    comboInstruction.textContent = STEP_INSTRUCTIONS[stepIndex] || '';
+    comboStrategy.textContent = steps[stepIndex].strategy;
+    comboMath.innerHTML = '';
+    comboNextBtn.textContent = 'Show the calculation';
+    learnState.calcShown = false;
+  }
 
   learnStartBtn.addEventListener('click', () => {
     const from = learnSourceSel.value, to = learnTargetSel.value;
@@ -207,56 +386,45 @@
     learnError.hidden = true;
     const converter = getConverter(from, to);
     const result = converter.compute(check.values.sourceValue, check.values);
+    learnState = { steps: result.steps, answerText: result.answerText, stepIndex: 0, calcShown: false };
 
-    learnState = { steps: result.steps, answerText: result.answerText, stepIndex: 0, phase: 'strategy' };
-    revealList.innerHTML = '';
-    revealNextBtn.hidden = false;
-    revealNextBtn.textContent = 'Reveal the strategy';
-    restartBtn.hidden = true;
-    solutionBox.hidden = false;
-    solutionBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    panTransition(fieldsCard, comboCard, 'forward', renderComboStep);
   });
 
-  revealNextBtn.addEventListener('click', () => {
+  comboNextBtn.addEventListener('click', () => {
     if (!learnState) return;
-    const { steps, stepIndex, phase } = learnState;
+    const { steps, stepIndex, calcShown } = learnState;
 
-    if (phase === 'strategy') {
-      // reveal the strategy card for the current step
-      const block = document.createElement('div');
-      block.className = 'step-block';
-      block.id = `learn-step-${stepIndex}`;
-      block.appendChild(strategyCard(steps[stepIndex].strategy, stepIndex));
-      revealList.appendChild(block);
-      block.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      learnState.phase = 'math';
-      revealNextBtn.textContent = 'Show the calculation';
+    if (!calcShown) {
+      // type the calculation into the same card — no pan for this part
+      typewriterReveal(comboMath, steps[stepIndex].math);
+      learnState.calcShown = true;
+      const isLast = stepIndex === steps.length - 1;
+      comboNextBtn.textContent = isLast ? 'Reveal final answer' : 'Reveal next step';
       return;
     }
 
-    if (phase === 'math') {
-      // reveal the math card under the same step block
-      const block = document.getElementById(`learn-step-${stepIndex}`);
-      block.appendChild(mathCard(steps[stepIndex].math));
-      const nextIndex = stepIndex + 1;
-      if (nextIndex < steps.length) {
-        learnState.stepIndex = nextIndex;
-        learnState.phase = 'strategy';
-        revealNextBtn.textContent = 'Reveal next step';
-      } else {
-        learnState.phase = 'answer';
-        revealNextBtn.textContent = 'Reveal the final answer';
-      }
-      return;
+    if (stepIndex + 1 < steps.length) {
+      // pan the combo card out, refresh it for the next step, pan it back in
+      panTransition(comboCard, comboCard, 'forward', () => {
+        learnState.stepIndex = stepIndex + 1;
+        renderComboStep();
+      });
+    } else {
+      // last step's calculation is shown — hand off to the final answer
+      answerValueEl.textContent = learnState.answerText;
+      panTransition(comboCard, answerCard, 'forward');
     }
+  });
 
-    if (phase === 'answer') {
-      revealList.appendChild(answerCallout(learnState.answerText));
-      revealList.lastElementChild.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      revealNextBtn.hidden = true;
-      restartBtn.hidden = false;
-      learnState.phase = 'done';
-    }
+  revealWorkingBtn.addEventListener('click', () => {
+    if (!learnState) return;
+    fullWorkingList.innerHTML = '';
+    learnState.steps.forEach(step => fullWorkingList.appendChild(pureWorkingCard(step.math)));
+    fullWorkingList.appendChild(pureWorkingCard(
+      `<span class="full-working-answer-label">Final answer</span>${learnState.answerText}`
+    ));
+    panTransition(answerCard, fullWorkingCard, 'forward');
   });
 
   restartBtn.addEventListener('click', resetLearn);
@@ -339,4 +507,5 @@
   /* ---------------- boot ---------------- */
   resetLearn();
   resetCheck();
+  playLandingEntrance();
 })();
