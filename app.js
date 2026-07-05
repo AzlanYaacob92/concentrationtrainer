@@ -445,6 +445,7 @@
   const comboCard = document.getElementById('learn-combo');
   const comboInstruction = document.getElementById('learn-combo-instruction');
   const comboStrategy = document.getElementById('learn-combo-strategy');
+  const comboFootnote = document.getElementById('learn-combo-footnote');
   const comboMath = document.getElementById('learn-combo-math');
   const comboNextBtn = document.getElementById('learn-combo-next');
 
@@ -496,7 +497,7 @@
     const from = learnSourceSel.value, to = learnTargetSel.value;
     const converter = getConverter(from, to);
     if (!converter) return; // safety: shouldn't happen, all 20 pairs exist
-    fieldsTitle.textContent = `You are making a conversion between "${MEASURES[from].name}" to "${MEASURES[to].name}"`;
+    fieldsTitle.innerHTML = `You are making the following conversion:<strong class="conversion-pair">${MEASURES[from].name} → ${MEASURES[to].name}</strong>`;
     learnInputs = renderFieldList(fieldList, from, converter.requires, 'learn');
     learnError.hidden = true;
     panTransition(promptSource, fieldsCard, 'forward');
@@ -512,6 +513,14 @@
     const { steps, stepIndex } = learnState;
     comboInstruction.textContent = STEP_INSTRUCTIONS[stepIndex] || '';
     comboStrategy.textContent = steps[stepIndex].strategy;
+    const footnote = steps[stepIndex].footnote;
+    if (footnote) {
+      comboFootnote.textContent = footnote;
+      comboFootnote.hidden = false;
+    } else {
+      comboFootnote.textContent = '';
+      comboFootnote.hidden = true;
+    }
     comboMath.innerHTML = '';
     comboNextBtn.textContent = 'Show the calculation';
     learnState.calcShown = false;

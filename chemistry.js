@@ -184,7 +184,7 @@ const CONVERTERS = {
       return {
         answer: ans, answerText: `Molarity = ${fmt(ans)} mol dm⁻³`,
         steps: [
-          { strategy: 'Take 1 kg (1000 g) of solvent as the basis. Molality gives the moles of solute dissolved in it.',
+          { strategy: 'Take 1 kg (1000 g) of solvent as the basis. Molality gives the moles of solute dissolved in it directly with this assumption.',
             math: `n(solute) = ${fmt(v)} mol` },
           { strategy: 'Find the total mass of solution (solvent + solute), then use density to get its volume in litres (molarity needs volume of solution).',
             math: `mass(solute) = ${fmt(v)} × ${fmt(p.Ms)} = ${fmt(massSolute)} g<br>mass(solution) = 1000 + ${fmt(massSolute)} = ${fmt(massSol)} g<br>V(solution) = ${frac(fmt(massSol), fmt(p.d) + ' × 1000')} = ${fmt(volSol)} L` },
@@ -518,6 +518,41 @@ const CONVERTERS = {
     }
   }
 };
+
+/* ---------- basis-assumption footnotes ----------
+   Every conversion's first working step picks a convenient basis amount
+   (1 L of solution, 1 kg of solvent, 100 g of solution, 100 mL of
+   solution, or 1 mol in total). That amount is a free choice — the final
+   concentration is intensive, so the answer is identical whatever you
+   pick — and each basis step carries a short note explaining why THAT
+   particular amount is the simplest one. The basis depends only on the
+   SOURCE measure, so the notes are keyed by "from". Injected onto steps[0]
+   automatically below, so the individual compute functions stay focused
+   on the chemistry and there is only one place to edit the wording. */
+const BASIS_FOOTNOTES = {
+  molarity:       'Any volume of solution works and the final answer is the same, but 1 L is simplest because molarity already gives the moles of solute in exactly 1 L.',
+  molality:       'Any mass of solvent works and the final answer is the same, but 1 kg is simplest because molality is defined per kilogram of solvent.',
+  mass_percent:   'Any mass of solution works and the final answer is the same, but 100 g is simplest because the percentage by mass then reads straight off as grams of solute.',
+  volume_percent: 'Any volume of solution works and the final answer is the same, but 100 mL is simplest because the percentage by volume then reads straight off as millilitres of solute.',
+  mole_fraction:  'Any total amount works and the final answer is the same, but 1 mol total is simplest because the mole fractions then read straight off as the moles of solute and solvent.'
+};
+
+// Wrap every converter's compute so its basis step (step 1) gains the
+// footnote for its source measure, without touching 20 step definitions.
+Object.keys(CONVERTERS).forEach(key => {
+  const from = key.split('|')[0];
+  const note = BASIS_FOOTNOTES[from];
+  if (!note) return;
+  const conv = CONVERTERS[key];
+  const originalCompute = conv.compute;
+  conv.compute = function (v, p) {
+    const result = originalCompute(v, p);
+    if (result && result.steps && result.steps[0] && !result.steps[0].footnote) {
+      result.steps[0] = Object.assign({}, result.steps[0], { footnote: note });
+    }
+    return result;
+  };
+});
 
 /* ---------- helper: look up a converter and its required fields ---------- */
 function getConverter(fromId, toId) {
