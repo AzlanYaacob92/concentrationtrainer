@@ -384,7 +384,7 @@
     const titles = STEP_TITLES[key] || [];
     const converter = getConverter(fromId, toId);
     // mole fraction has no unit — show just the number
-    const unit = target.unit === '' ? '' : target.symbol;
+    const unit = target.unit === '' ? '' : (target.formulaSymbol || target.symbol);
 
     const stepsHtml = result.steps.map((step, i) => `
       <li class="worksheet-step">
