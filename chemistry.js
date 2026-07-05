@@ -24,19 +24,19 @@ const MEASURES = {
     valueLabel: 'Molarity', min: 0, max: Infinity, rangeHint: 'a value greater than 0'
   },
   molality: {
-    id: 'molality', name: 'Molality', symbol: 'm', unit: 'mol kg⁻¹', formulaSymbol: 'm',
+    id: 'molality', name: 'Molality', symbol: '𝑚', unit: 'mol kg⁻¹', formulaSymbol: '<i>m</i>',
     valueLabel: 'Molality', min: 0, max: Infinity, rangeHint: 'a value greater than 0'
   },
   mass_percent: {
-    id: 'mass_percent', name: 'Percentage by mass', symbol: '% w/w', unit: '%', formulaSymbol: 'P<sub>m</sub>',
+    id: 'mass_percent', name: 'Percentage by mass', symbol: '% w/w', unit: '%', formulaSymbol: '% w/w',
     valueLabel: 'Percentage by mass', min: 0, max: 100, rangeHint: 'a value between 0 and 100'
   },
   volume_percent: {
-    id: 'volume_percent', name: 'Percentage by volume', symbol: '% v/v', unit: '%', formulaSymbol: 'P<sub>v</sub>',
+    id: 'volume_percent', name: 'Percentage by volume', symbol: '% V/V', unit: '%', formulaSymbol: '% V/V',
     valueLabel: 'Percentage by volume', min: 0, max: 100, rangeHint: 'a value between 0 and 100'
   },
   mole_fraction: {
-    id: 'mole_fraction', name: 'Mole fraction', symbol: 'x', unit: '', formulaSymbol: 'x',
+    id: 'mole_fraction', name: 'Mole fraction', symbol: 'X', unit: '', formulaSymbol: 'X<sub>solute</sub>',
     valueLabel: 'Mole fraction of solute', min: 0, max: 1, rangeHint: 'a value between 0 and 1'
   }
 };
@@ -87,7 +87,7 @@ const CONVERTERS = {
   /* ---------- FROM MOLARITY (basis: 1 L = 1000 mL of solution) ---------- */
   'molarity|molality': {
     requires: ['Ms', 'd'],
-    oneLine: frac('1000 · M', '1000 · ρ − M · M(solute)'),
+    oneLine: frac('1000 · M', '1000 · ρ<sub>solution</sub> − M · M<sub>r</sub>(solute)'),
     compute: (v, p) => {
       const massSol = 1000 * p.d;            // g of solution in 1 L
       const massSolute = v * p.Ms;           // g of solute
@@ -97,11 +97,11 @@ const CONVERTERS = {
         answer: ans, answerText: `Molality = ${fmt(ans)} mol kg⁻¹`,
         steps: [
           { strategy: 'Take 1 L (1000 mL) of solution as the basis. Molarity tells us how many moles of solute are in that 1 L.',
-            math: `n(solute) = ${fmt(v)} mol` },
+            math: `n<sub>solute</sub> = M × V<sub>solution</sub> = ${fmt(v)} mol dm⁻³ × 1 dm³ = ${fmt(v)} mol` },
           { strategy: 'Use the density to find the mass of the whole solution, then subtract the mass of solute to get the mass of solvent (molality needs mass of solvent).',
-            math: `mass(solution) = 1000 mL × ${fmt(p.d)} g mL⁻¹ = ${fmt(massSol)} g<br>mass(solute) = ${fmt(v)} × ${fmt(p.Ms)} = ${fmt(massSolute)} g<br>mass(solvent) = ${fmt(massSol)} − ${fmt(massSolute)} = ${fmt(massSolvent)} g = ${fmt(massSolvent/1000)} kg` },
+            math: `m<sub>solution</sub> = V<sub>solution</sub> × ρ<sub>solution</sub> = 1000 mL × ${fmt(p.d)} g mL⁻¹ = ${fmt(massSol)} g<br>m<sub>solute</sub> = n<sub>solute</sub> × M<sub>r</sub>(solute) = ${fmt(v)} × ${fmt(p.Ms)} = ${fmt(massSolute)} g<br>m<sub>solvent</sub> = m<sub>solution</sub> − m<sub>solute</sub> = ${fmt(massSol)} − ${fmt(massSolute)} = ${fmt(massSolvent)} g = ${fmt(massSolvent/1000)} kg` },
           { strategy: 'Molality = moles of solute ÷ kilograms of solvent.',
-            math: `m = ${frac(fmt(v), fmt(massSolvent/1000))} = ${fmt(ans)} mol kg⁻¹` }
+            math: `<i>m</i> = ${frac('n<sub>solute</sub>', 'm<sub>solvent</sub>')} = ${frac(fmt(v), fmt(massSolvent/1000))} = ${fmt(ans)} mol kg⁻¹` }
         ]
       };
     }
@@ -109,7 +109,7 @@ const CONVERTERS = {
 
   'molarity|mass_percent': {
     requires: ['Ms', 'd'],
-    oneLine: frac('M · M(solute)', '10 · ρ'),
+    oneLine: frac('M · M<sub>r</sub>(solute)', '10 · ρ<sub>solution</sub>'),
     compute: (v, p) => {
       const massSol = 1000 * p.d;
       const massSolute = v * p.Ms;
@@ -118,11 +118,11 @@ const CONVERTERS = {
         answer: ans, answerText: `Percentage by mass = ${fmt(ans)} %`,
         steps: [
           { strategy: 'Take 1 L of solution as the basis. Molarity gives the moles of solute in it.',
-            math: `n(solute) = ${fmt(v)} mol` },
+            math: `n<sub>solute</sub> = M × V<sub>solution</sub> = ${fmt(v)} mol dm⁻³ × 1 dm³ = ${fmt(v)} mol` },
           { strategy: 'Find the mass of solute (moles × molar mass) and the mass of the whole solution (volume × density).',
-            math: `mass(solute) = ${fmt(v)} × ${fmt(p.Ms)} = ${fmt(massSolute)} g<br>mass(solution) = 1000 × ${fmt(p.d)} = ${fmt(massSol)} g` },
+            math: `m<sub>solute</sub> = n<sub>solute</sub> × M<sub>r</sub>(solute) = ${fmt(v)} × ${fmt(p.Ms)} = ${fmt(massSolute)} g<br>m<sub>solution</sub> = V<sub>solution</sub> × ρ<sub>solution</sub> = 1000 × ${fmt(p.d)} = ${fmt(massSol)} g` },
           { strategy: 'Percentage by mass = mass of solute ÷ mass of solution × 100.',
-            math: `% w/w = ${frac(fmt(massSolute), fmt(massSol))} × 100 = ${fmt(ans)} %` }
+            math: `% w/w = ${frac('m<sub>solute</sub>', 'm<sub>solution</sub>')} × 100 = ${frac(fmt(massSolute), fmt(massSol))} × 100 = ${fmt(ans)} %` }
         ]
       };
     }
@@ -130,7 +130,7 @@ const CONVERTERS = {
 
   'molarity|mole_fraction': {
     requires: ['Ms', 'Mv', 'd'],
-    oneLine: frac('M · M(solvent)', 'M · M(solvent) + 1000 · ρ − M · M(solute)'),
+    oneLine: frac('M · M<sub>r</sub>(solvent)', 'M · M<sub>r</sub>(solvent) + 1000 · ρ<sub>solution</sub> − M · M<sub>r</sub>(solute)'),
     compute: (v, p) => {
       const massSol = 1000 * p.d;
       const massSolute = v * p.Ms;
@@ -141,11 +141,11 @@ const CONVERTERS = {
         answer: ans, answerText: `Mole fraction of solute = ${fmt(ans)}`,
         steps: [
           { strategy: 'Take 1 L of solution. Molarity gives the moles of solute directly.',
-            math: `n(solute) = ${fmt(v)} mol` },
+            math: `n<sub>solute</sub> = M × V<sub>solution</sub> = ${fmt(v)} mol dm⁻³ × 1 dm³ = ${fmt(v)} mol` },
           { strategy: 'Get the mass of solvent (density → mass of solution, minus mass of solute), then convert it to moles using the solvent’s molar mass.',
-            math: `mass(solution) = 1000 × ${fmt(p.d)} = ${fmt(massSol)} g<br>mass(solvent) = ${fmt(massSol)} − ${fmt(massSolute)} = ${fmt(massSolvent)} g<br>n(solvent) = ${frac(fmt(massSolvent), fmt(p.Mv))} = ${fmt(nSolvent)} mol` },
+            math: `m<sub>solution</sub> = V<sub>solution</sub> × ρ<sub>solution</sub> = 1000 × ${fmt(p.d)} = ${fmt(massSol)} g<br>m<sub>solvent</sub> = m<sub>solution</sub> − m<sub>solute</sub> = ${fmt(massSol)} − ${fmt(massSolute)} = ${fmt(massSolvent)} g<br>n<sub>solvent</sub> = ${frac('m<sub>solvent</sub>', 'M<sub>r</sub>(solvent)')} = ${frac(fmt(massSolvent), fmt(p.Mv))} = ${fmt(nSolvent)} mol` },
           { strategy: 'Mole fraction of solute = moles of solute ÷ total moles.',
-            math: `x = ${frac(fmt(v), fmt(v) + ' + ' + fmt(nSolvent))} = ${fmt(ans)}` }
+            math: `X<sub>solute</sub> = ${frac('n<sub>solute</sub>', 'n<sub>solute</sub> + n<sub>solvent</sub>')} = ${frac(fmt(v), fmt(v) + ' + ' + fmt(nSolvent))} = ${fmt(ans)}` }
         ]
       };
     }
@@ -153,7 +153,7 @@ const CONVERTERS = {
 
   'molarity|volume_percent': {
     requires: ['Ms', 'ds'],
-    oneLine: frac('M · M(solute)', '10 · ρ(solute)'),
+    oneLine: frac('M · M<sub>r</sub>(solute)', '10 · ρ<sub>solute</sub>'),
     compute: (v, p) => {
       const massSolute = v * p.Ms;
       const volSolute = massSolute / p.ds;      // mL, within the 1000 mL basis
@@ -162,11 +162,11 @@ const CONVERTERS = {
         answer: ans, answerText: `Percentage by volume = ${fmt(ans)} %`,
         steps: [
           { strategy: 'Take 1 L (1000 mL) of solution. Molarity gives the moles of solute in it. ' + ADDITIVITY_NOTE,
-            math: `n(solute) = ${fmt(v)} mol` },
+            math: `n<sub>solute</sub> = M × V<sub>solution</sub> = ${fmt(v)} mol dm⁻³ × 1 dm³ = ${fmt(v)} mol` },
           { strategy: 'Find the mass of solute, then convert to a volume using the solute’s own density.',
-            math: `mass(solute) = ${fmt(v)} × ${fmt(p.Ms)} = ${fmt(massSolute)} g<br>V(solute) = ${frac(fmt(massSolute), fmt(p.ds))} = ${fmt(volSolute)} mL` },
+            math: `m<sub>solute</sub> = n<sub>solute</sub> × M<sub>r</sub>(solute) = ${fmt(v)} × ${fmt(p.Ms)} = ${fmt(massSolute)} g<br>V<sub>solute</sub> = ${frac('m<sub>solute</sub>', 'ρ<sub>solute</sub>')} = ${frac(fmt(massSolute), fmt(p.ds))} = ${fmt(volSolute)} mL` },
           { strategy: 'Percentage by volume = volume of solute ÷ volume of solution × 100.',
-            math: `% v/v = ${frac(fmt(volSolute), '1000')} × 100 = ${fmt(ans)} %` }
+            math: `% V/V = ${frac('V<sub>solute</sub>', 'V<sub>solution</sub>')} × 100 = ${frac(fmt(volSolute), '1000')} × 100 = ${fmt(ans)} %` }
         ]
       };
     }
@@ -175,7 +175,7 @@ const CONVERTERS = {
   /* ---------- FROM MOLALITY (basis: 1 kg = 1000 g of solvent) ---------- */
   'molality|molarity': {
     requires: ['Ms', 'd'],
-    oneLine: frac('1000 · m · ρ', '1000 + m · M(solute)'),
+    oneLine: frac('1000 · <i>m</i> · ρ<sub>solution</sub>', '1000 + <i>m</i> · M<sub>r</sub>(solute)'),
     compute: (v, p) => {
       const massSolute = v * p.Ms;
       const massSol = 1000 + massSolute;
@@ -185,11 +185,11 @@ const CONVERTERS = {
         answer: ans, answerText: `Molarity = ${fmt(ans)} mol dm⁻³`,
         steps: [
           { strategy: 'Take 1 kg (1000 g) of solvent as the basis. Molality gives the moles of solute dissolved in it directly with this assumption.',
-            math: `n(solute) = ${fmt(v)} mol` },
+            math: `n<sub>solute</sub> = <i>m</i> × m<sub>solvent</sub> = ${fmt(v)} mol kg⁻¹ × 1 kg = ${fmt(v)} mol` },
           { strategy: 'Find the total mass of solution (solvent + solute), then use density to get its volume in litres (molarity needs volume of solution).',
-            math: `mass(solute) = ${fmt(v)} × ${fmt(p.Ms)} = ${fmt(massSolute)} g<br>mass(solution) = 1000 + ${fmt(massSolute)} = ${fmt(massSol)} g<br>V(solution) = ${frac(fmt(massSol), fmt(p.d) + ' × 1000')} = ${fmt(volSol)} L` },
+            math: `m<sub>solute</sub> = n<sub>solute</sub> × M<sub>r</sub>(solute) = ${fmt(v)} × ${fmt(p.Ms)} = ${fmt(massSolute)} g<br>m<sub>solution</sub> = m<sub>solvent</sub> + m<sub>solute</sub> = 1000 + ${fmt(massSolute)} = ${fmt(massSol)} g<br>V<sub>solution</sub> = ${frac('m<sub>solution</sub>', 'ρ<sub>solution</sub> × 1000')} = ${frac(fmt(massSol), fmt(p.d) + ' × 1000')} = ${fmt(volSol)} L` },
           { strategy: 'Molarity = moles of solute ÷ litres of solution.',
-            math: `M = ${frac(fmt(v), fmt(volSol))} = ${fmt(ans)} mol dm⁻³` }
+            math: `M = ${frac('n<sub>solute</sub>', 'V<sub>solution</sub>')} = ${frac(fmt(v), fmt(volSol))} = ${fmt(ans)} mol dm⁻³` }
         ]
       };
     }
@@ -197,7 +197,7 @@ const CONVERTERS = {
 
   'molality|mass_percent': {
     requires: ['Ms'],
-    oneLine: frac('100 · m · M(solute)', '1000 + m · M(solute)'),
+    oneLine: frac('100 · <i>m</i> · M<sub>r</sub>(solute)', '1000 + <i>m</i> · M<sub>r</sub>(solute)'),
     compute: (v, p) => {
       const massSolute = v * p.Ms;
       const massSol = 1000 + massSolute;
@@ -206,11 +206,11 @@ const CONVERTERS = {
         answer: ans, answerText: `Percentage by mass = ${fmt(ans)} %`,
         steps: [
           { strategy: 'Take 1 kg (1000 g) of solvent. Molality gives the moles of solute in it. No density is needed — both quantities here are masses.',
-            math: `n(solute) = ${fmt(v)} mol` },
+            math: `n<sub>solute</sub> = <i>m</i> × m<sub>solvent</sub> = ${fmt(v)} mol kg⁻¹ × 1 kg = ${fmt(v)} mol` },
           { strategy: 'Find the mass of solute, then the mass of the whole solution.',
-            math: `mass(solute) = ${fmt(v)} × ${fmt(p.Ms)} = ${fmt(massSolute)} g<br>mass(solution) = 1000 + ${fmt(massSolute)} = ${fmt(massSol)} g` },
+            math: `m<sub>solute</sub> = n<sub>solute</sub> × M<sub>r</sub>(solute) = ${fmt(v)} × ${fmt(p.Ms)} = ${fmt(massSolute)} g<br>m<sub>solution</sub> = m<sub>solvent</sub> + m<sub>solute</sub> = 1000 + ${fmt(massSolute)} = ${fmt(massSol)} g` },
           { strategy: 'Percentage by mass = mass of solute ÷ mass of solution × 100.',
-            math: `% w/w = ${frac(fmt(massSolute), fmt(massSol))} × 100 = ${fmt(ans)} %` }
+            math: `% w/w = ${frac('m<sub>solute</sub>', 'm<sub>solution</sub>')} × 100 = ${frac(fmt(massSolute), fmt(massSol))} × 100 = ${fmt(ans)} %` }
         ]
       };
     }
@@ -218,7 +218,7 @@ const CONVERTERS = {
 
   'molality|mole_fraction': {
     requires: ['Mv'],
-    oneLine: frac('m · M(solvent)', 'm · M(solvent) + 1000'),
+    oneLine: frac('<i>m</i> · M<sub>r</sub>(solvent)', '<i>m</i> · M<sub>r</sub>(solvent) + 1000'),
     compute: (v, p) => {
       const nSolvent = 1000 / p.Mv;
       const ans = v / (v + nSolvent);
@@ -226,11 +226,11 @@ const CONVERTERS = {
         answer: ans, answerText: `Mole fraction of solute = ${fmt(ans)}`,
         steps: [
           { strategy: 'Take 1 kg (1000 g) of solvent. Molality gives the moles of solute directly.',
-            math: `n(solute) = ${fmt(v)} mol` },
+            math: `n<sub>solute</sub> = <i>m</i> × m<sub>solvent</sub> = ${fmt(v)} mol kg⁻¹ × 1 kg = ${fmt(v)} mol` },
           { strategy: 'Convert the 1000 g of solvent into moles using the solvent’s molar mass.',
-            math: `n(solvent) = ${frac('1000', fmt(p.Mv))} = ${fmt(nSolvent)} mol` },
+            math: `n<sub>solvent</sub> = ${frac('m<sub>solvent</sub>', 'M<sub>r</sub>(solvent)')} = ${frac('1000', fmt(p.Mv))} = ${fmt(nSolvent)} mol` },
           { strategy: 'Mole fraction of solute = moles of solute ÷ total moles.',
-            math: `x = ${frac(fmt(v), fmt(v) + ' + ' + fmt(nSolvent))} = ${fmt(ans)}` }
+            math: `X<sub>solute</sub> = ${frac('n<sub>solute</sub>', 'n<sub>solute</sub> + n<sub>solvent</sub>')} = ${frac(fmt(v), fmt(v) + ' + ' + fmt(nSolvent))} = ${fmt(ans)}` }
         ]
       };
     }
@@ -238,7 +238,7 @@ const CONVERTERS = {
 
   'molality|volume_percent': {
     requires: ['Ms', 'ds', 'dv'],
-    oneLine: frac('100 · m · M(solute) · ρ(solvent)', 'm · M(solute) · ρ(solvent) + 1000 · ρ(solute)'),
+    oneLine: frac('100 · <i>m</i> · M<sub>r</sub>(solute) · ρ<sub>solvent</sub>', '<i>m</i> · M<sub>r</sub>(solute) · ρ<sub>solvent</sub> + 1000 · ρ<sub>solute</sub>'),
     compute: (v, p) => {
       const massSolute = v * p.Ms;
       const volSolute = massSolute / p.ds;
@@ -248,11 +248,11 @@ const CONVERTERS = {
         answer: ans, answerText: `Percentage by volume = ${fmt(ans)} %`,
         steps: [
           { strategy: 'Take 1 kg (1000 g) of solvent. Molality gives the moles of solute. ' + ADDITIVITY_NOTE,
-            math: `n(solute) = ${fmt(v)} mol` },
+            math: `n<sub>solute</sub> = <i>m</i> × m<sub>solvent</sub> = ${fmt(v)} mol kg⁻¹ × 1 kg = ${fmt(v)} mol` },
           { strategy: 'Convert the solute to a volume (via its mass and density), and convert the 1000 g of solvent to a volume too.',
-            math: `mass(solute) = ${fmt(v)} × ${fmt(p.Ms)} = ${fmt(massSolute)} g<br>V(solute) = ${frac(fmt(massSolute), fmt(p.ds))} = ${fmt(volSolute)} mL<br>V(solvent) = ${frac('1000', fmt(p.dv))} = ${fmt(volSolvent)} mL` },
+            math: `m<sub>solute</sub> = n<sub>solute</sub> × M<sub>r</sub>(solute) = ${fmt(v)} × ${fmt(p.Ms)} = ${fmt(massSolute)} g<br>V<sub>solute</sub> = ${frac('m<sub>solute</sub>', 'ρ<sub>solute</sub>')} = ${frac(fmt(massSolute), fmt(p.ds))} = ${fmt(volSolute)} mL<br>V<sub>solvent</sub> = ${frac('m<sub>solvent</sub>', 'ρ<sub>solvent</sub>')} = ${frac('1000', fmt(p.dv))} = ${fmt(volSolvent)} mL` },
           { strategy: 'Percentage by volume = volume of solute ÷ total volume × 100.',
-            math: `% v/v = ${frac(fmt(volSolute), fmt(volSolute) + ' + ' + fmt(volSolvent))} × 100 = ${fmt(ans)} %` }
+            math: `% V/V = ${frac('V<sub>solute</sub>', 'V<sub>solute</sub> + V<sub>solvent</sub>')} × 100 = ${frac(fmt(volSolute), fmt(volSolute) + ' + ' + fmt(volSolvent))} × 100 = ${fmt(ans)} %` }
         ]
       };
     }
@@ -261,7 +261,7 @@ const CONVERTERS = {
   /* ---------- FROM PERCENTAGE BY MASS (basis: 100 g of solution) ---------- */
   'mass_percent|molarity': {
     requires: ['Ms', 'd'],
-    oneLine: frac('10 · P<sub>m</sub> · ρ', 'M(solute)'),
+    oneLine: frac('10 · % w/w · ρ<sub>solution</sub>', 'M<sub>r</sub>(solute)'),
     compute: (v, p) => {
       const massSolute = v;                    // g in 100 g solution
       const nSolute = massSolute / p.Ms;
@@ -271,11 +271,11 @@ const CONVERTERS = {
         answer: ans, answerText: `Molarity = ${fmt(ans)} mol dm⁻³`,
         steps: [
           { strategy: 'Take 100 g of solution as the basis. The percentage by mass is then simply the number of grams of solute.',
-            math: `mass(solute) = ${fmt(v)} g` },
+            math: `m<sub>solute</sub> = % w/w × m<sub>solution</sub> = ${fmt(v)}% × 100 g = ${fmt(v)} g` },
           { strategy: 'Convert that mass to moles, and use density to find the volume of the 100 g of solution in litres.',
-            math: `n(solute) = ${frac(fmt(v), fmt(p.Ms))} = ${fmt(nSolute)} mol<br>V(solution) = ${frac('100', fmt(p.d) + ' × 1000')} = ${fmt(volSol)} L` },
+            math: `n<sub>solute</sub> = ${frac('m<sub>solute</sub>', 'M<sub>r</sub>(solute)')} = ${frac(fmt(v), fmt(p.Ms))} = ${fmt(nSolute)} mol<br>V<sub>solution</sub> = ${frac('m<sub>solution</sub>', 'ρ<sub>solution</sub> × 1000')} = ${frac('100', fmt(p.d) + ' × 1000')} = ${fmt(volSol)} L` },
           { strategy: 'Molarity = moles of solute ÷ litres of solution.',
-            math: `M = ${frac(fmt(nSolute), fmt(volSol))} = ${fmt(ans)} mol dm⁻³` }
+            math: `M = ${frac('n<sub>solute</sub>', 'V<sub>solution</sub>')} = ${frac(fmt(nSolute), fmt(volSol))} = ${fmt(ans)} mol dm⁻³` }
         ]
       };
     }
@@ -283,7 +283,7 @@ const CONVERTERS = {
 
   'mass_percent|molality': {
     requires: ['Ms'],
-    oneLine: frac('1000 · P<sub>m</sub>', 'M(solute) · (100 − P<sub>m</sub>)'),
+    oneLine: frac('1000 · % w/w', 'M<sub>r</sub>(solute) · (100 − % w/w)'),
     compute: (v, p) => {
       const massSolute = v;
       const massSolvent = 100 - v;
@@ -293,11 +293,11 @@ const CONVERTERS = {
         answer: ans, answerText: `Molality = ${fmt(ans)} mol kg⁻¹`,
         steps: [
           { strategy: 'Take 100 g of solution. The percentage by mass is the grams of solute; the rest is solvent. No density needed.',
-            math: `mass(solute) = ${fmt(v)} g<br>mass(solvent) = 100 − ${fmt(v)} = ${fmt(massSolvent)} g = ${fmt(massSolvent/1000)} kg` },
+            math: `m<sub>solute</sub> = % w/w × m<sub>solution</sub> = ${fmt(v)}% × 100 g = ${fmt(v)} g<br>m<sub>solvent</sub> = m<sub>solution</sub> − m<sub>solute</sub> = 100 − ${fmt(v)} = ${fmt(massSolvent)} g = ${fmt(massSolvent/1000)} kg` },
           { strategy: 'Convert the mass of solute to moles.',
-            math: `n(solute) = ${frac(fmt(v), fmt(p.Ms))} = ${fmt(nSolute)} mol` },
+            math: `n<sub>solute</sub> = ${frac('m<sub>solute</sub>', 'M<sub>r</sub>(solute)')} = ${frac(fmt(v), fmt(p.Ms))} = ${fmt(nSolute)} mol` },
           { strategy: 'Molality = moles of solute ÷ kilograms of solvent.',
-            math: `m = ${frac(fmt(nSolute), fmt(massSolvent/1000))} = ${fmt(ans)} mol kg⁻¹` }
+            math: `<i>m</i> = ${frac('n<sub>solute</sub>', 'm<sub>solvent</sub>')} = ${frac(fmt(nSolute), fmt(massSolvent/1000))} = ${fmt(ans)} mol kg⁻¹` }
         ]
       };
     }
@@ -305,7 +305,7 @@ const CONVERTERS = {
 
   'mass_percent|mole_fraction': {
     requires: ['Ms', 'Mv'],
-    oneLine: frac('P<sub>m</sub> · M(solvent)', 'P<sub>m</sub> · M(solvent) + (100 − P<sub>m</sub>) · M(solute)'),
+    oneLine: frac('% w/w · M<sub>r</sub>(solvent)', '% w/w · M<sub>r</sub>(solvent) + (100 − % w/w) · M<sub>r</sub>(solute)'),
     compute: (v, p) => {
       const nSolute = v / p.Ms;
       const nSolvent = (100 - v) / p.Mv;
@@ -314,11 +314,11 @@ const CONVERTERS = {
         answer: ans, answerText: `Mole fraction of solute = ${fmt(ans)}`,
         steps: [
           { strategy: 'Take 100 g of solution. The percentage by mass gives grams of solute; the remainder is solvent.',
-            math: `mass(solute) = ${fmt(v)} g, mass(solvent) = ${fmt(100 - v)} g` },
+            math: `m<sub>solute</sub> = % w/w × m<sub>solution</sub> = ${fmt(v)}% × 100 g = ${fmt(v)} g<br>m<sub>solvent</sub> = m<sub>solution</sub> − m<sub>solute</sub> = 100 − ${fmt(v)} = ${fmt(100 - v)} g` },
           { strategy: 'Convert each mass to moles using its molar mass.',
-            math: `n(solute) = ${frac(fmt(v), fmt(p.Ms))} = ${fmt(nSolute)} mol<br>n(solvent) = ${frac(fmt(100 - v), fmt(p.Mv))} = ${fmt(nSolvent)} mol` },
+            math: `n<sub>solute</sub> = ${frac('m<sub>solute</sub>', 'M<sub>r</sub>(solute)')} = ${frac(fmt(v), fmt(p.Ms))} = ${fmt(nSolute)} mol<br>n<sub>solvent</sub> = ${frac('m<sub>solvent</sub>', 'M<sub>r</sub>(solvent)')} = ${frac(fmt(100 - v), fmt(p.Mv))} = ${fmt(nSolvent)} mol` },
           { strategy: 'Mole fraction of solute = moles of solute ÷ total moles.',
-            math: `x = ${frac(fmt(nSolute), fmt(nSolute) + ' + ' + fmt(nSolvent))} = ${fmt(ans)}` }
+            math: `X<sub>solute</sub> = ${frac('n<sub>solute</sub>', 'n<sub>solute</sub> + n<sub>solvent</sub>')} = ${frac(fmt(nSolute), fmt(nSolute) + ' + ' + fmt(nSolvent))} = ${fmt(ans)}` }
         ]
       };
     }
@@ -326,7 +326,7 @@ const CONVERTERS = {
 
   'mass_percent|volume_percent': {
     requires: ['ds', 'dv'],
-    oneLine: frac('100 · P<sub>m</sub> · ρ(solvent)', 'P<sub>m</sub> · ρ(solvent) + (100 − P<sub>m</sub>) · ρ(solute)'),
+    oneLine: frac('100 · % w/w · ρ<sub>solvent</sub>', '% w/w · ρ<sub>solvent</sub> + (100 − % w/w) · ρ<sub>solute</sub>'),
     compute: (v, p) => {
       const volSolute = v / p.ds;
       const volSolvent = (100 - v) / p.dv;
@@ -335,11 +335,11 @@ const CONVERTERS = {
         answer: ans, answerText: `Percentage by volume = ${fmt(ans)} %`,
         steps: [
           { strategy: 'Take 100 g of solution. The percentage by mass gives grams of solute; the rest is solvent. ' + ADDITIVITY_NOTE,
-            math: `mass(solute) = ${fmt(v)} g, mass(solvent) = ${fmt(100 - v)} g` },
+            math: `m<sub>solute</sub> = % w/w × m<sub>solution</sub> = ${fmt(v)}% × 100 g = ${fmt(v)} g<br>m<sub>solvent</sub> = m<sub>solution</sub> − m<sub>solute</sub> = 100 − ${fmt(v)} = ${fmt(100 - v)} g` },
           { strategy: 'Convert each mass to a volume using its own density.',
-            math: `V(solute) = ${frac(fmt(v), fmt(p.ds))} = ${fmt(volSolute)} mL<br>V(solvent) = ${frac(fmt(100 - v), fmt(p.dv))} = ${fmt(volSolvent)} mL` },
+            math: `V<sub>solute</sub> = ${frac('m<sub>solute</sub>', 'ρ<sub>solute</sub>')} = ${frac(fmt(v), fmt(p.ds))} = ${fmt(volSolute)} mL<br>V<sub>solvent</sub> = ${frac('m<sub>solvent</sub>', 'ρ<sub>solvent</sub>')} = ${frac(fmt(100 - v), fmt(p.dv))} = ${fmt(volSolvent)} mL` },
           { strategy: 'Percentage by volume = volume of solute ÷ total volume × 100.',
-            math: `% v/v = ${frac(fmt(volSolute), fmt(volSolute) + ' + ' + fmt(volSolvent))} × 100 = ${fmt(ans)} %` }
+            math: `% V/V = ${frac('m<sub>solute</sub>', 'm<sub>solute</sub> + m<sub>solvent</sub>')} × 100 = ${frac(fmt(volSolute), fmt(volSolute) + ' + ' + fmt(volSolvent))} × 100 = ${fmt(ans)} %` }
         ]
       };
     }
@@ -348,7 +348,7 @@ const CONVERTERS = {
   /* ---------- FROM PERCENTAGE BY VOLUME (basis: 100 mL of solution) ---------- */
   'volume_percent|molarity': {
     requires: ['ds', 'Ms'],
-    oneLine: frac('10 · P<sub>v</sub> · ρ(solute)', 'M(solute)'),
+    oneLine: frac('10 · % V/V · ρ<sub>solute</sub>', 'M<sub>r</sub>(solute)'),
     compute: (v, p) => {
       const volSolute = v;                     // mL in 100 mL solution
       const massSolute = volSolute * p.ds;
@@ -358,11 +358,11 @@ const CONVERTERS = {
         answer: ans, answerText: `Molarity = ${fmt(ans)} mol dm⁻³`,
         steps: [
           { strategy: 'Take 100 mL of solution. The percentage by volume is the millilitres of solute. ' + ADDITIVITY_NOTE,
-            math: `V(solute) = ${fmt(v)} mL, V(solution) = 100 mL = 0.1 L` },
+            math: `V<sub>solute</sub> = % V/V × V<sub>solution</sub> = ${fmt(v)}% × 100 mL = ${fmt(v)} mL<br>V<sub>solution</sub> = 100 mL = 0.1 L` },
           { strategy: 'Turn the volume of solute into a mass (its own density) and then into moles.',
-            math: `mass(solute) = ${fmt(v)} × ${fmt(p.ds)} = ${fmt(massSolute)} g<br>n(solute) = ${frac(fmt(massSolute), fmt(p.Ms))} = ${fmt(nSolute)} mol` },
+            math: `m<sub>solute</sub> = V<sub>solute</sub> × ρ<sub>solute</sub> = ${fmt(v)} × ${fmt(p.ds)} = ${fmt(massSolute)} g<br>n<sub>solute</sub> = ${frac('m<sub>solute</sub>', 'M<sub>r</sub>(solute)')} = ${frac(fmt(massSolute), fmt(p.Ms))} = ${fmt(nSolute)} mol` },
           { strategy: 'Molarity = moles of solute ÷ litres of solution.',
-            math: `M = ${frac(fmt(nSolute), '0.1')} = ${fmt(ans)} mol dm⁻³` }
+            math: `M = ${frac('n<sub>solute</sub>', 'V<sub>solution</sub>')} = ${frac(fmt(nSolute), '0.1')} = ${fmt(ans)} mol dm⁻³` }
         ]
       };
     }
@@ -370,7 +370,7 @@ const CONVERTERS = {
 
   'volume_percent|molality': {
     requires: ['ds', 'dv', 'Ms'],
-    oneLine: frac('1000 · P<sub>v</sub> · ρ(solute)', 'M(solute) · (100 − P<sub>v</sub>) · ρ(solvent)'),
+    oneLine: frac('1000 · % V/V · ρ<sub>solute</sub>', 'M<sub>r</sub>(solute) · (100 − % V/V) · ρ<sub>solvent</sub>'),
     compute: (v, p) => {
       const massSolute = v * p.ds;
       const massSolvent = (100 - v) * p.dv;
@@ -380,11 +380,11 @@ const CONVERTERS = {
         answer: ans, answerText: `Molality = ${fmt(ans)} mol kg⁻¹`,
         steps: [
           { strategy: 'Take 100 mL of solution. The percentage by volume gives mL of solute; the rest is solvent. ' + ADDITIVITY_NOTE,
-            math: `V(solute) = ${fmt(v)} mL, V(solvent) = ${fmt(100 - v)} mL` },
+            math: `V<sub>solute</sub> = % V/V × V<sub>solution</sub> = ${fmt(v)}% × 100 mL = ${fmt(v)} mL<br>V<sub>solvent</sub> = V<sub>solution</sub> − V<sub>solute</sub> = 100 − ${fmt(v)} = ${fmt(100 - v)} mL` },
           { strategy: 'Convert both volumes to masses using their densities, then convert the solute mass to moles.',
-            math: `mass(solute) = ${fmt(v)} × ${fmt(p.ds)} = ${fmt(massSolute)} g<br>mass(solvent) = ${fmt(100 - v)} × ${fmt(p.dv)} = ${fmt(massSolvent)} g = ${fmt(massSolvent/1000)} kg<br>n(solute) = ${frac(fmt(massSolute), fmt(p.Ms))} = ${fmt(nSolute)} mol` },
+            math: `m<sub>solute</sub> = V<sub>solute</sub> × ρ<sub>solute</sub> = ${fmt(v)} × ${fmt(p.ds)} = ${fmt(massSolute)} g<br>m<sub>solvent</sub> = V<sub>solvent</sub> × ρ<sub>solvent</sub> = ${fmt(100 - v)} × ${fmt(p.dv)} = ${fmt(massSolvent)} g = ${fmt(massSolvent/1000)} kg<br>n<sub>solute</sub> = ${frac('m<sub>solute</sub>', 'M<sub>r</sub>(solute)')} = ${frac(fmt(massSolute), fmt(p.Ms))} = ${fmt(nSolute)} mol` },
           { strategy: 'Molality = moles of solute ÷ kilograms of solvent.',
-            math: `m = ${frac(fmt(nSolute), fmt(massSolvent/1000))} = ${fmt(ans)} mol kg⁻¹` }
+            math: `<i>m</i> = ${frac('n<sub>solute</sub>', 'm<sub>solvent</sub>')} = ${frac(fmt(nSolute), fmt(massSolvent/1000))} = ${fmt(ans)} mol kg⁻¹` }
         ]
       };
     }
@@ -392,7 +392,7 @@ const CONVERTERS = {
 
   'volume_percent|mass_percent': {
     requires: ['ds', 'dv'],
-    oneLine: frac('100 · P<sub>v</sub> · ρ(solute)', 'P<sub>v</sub> · ρ(solute) + (100 − P<sub>v</sub>) · ρ(solvent)'),
+    oneLine: frac('100 · % V/V · ρ<sub>solute</sub>', '% V/V · ρ<sub>solute</sub> + (100 − % V/V) · ρ<sub>solvent</sub>'),
     compute: (v, p) => {
       const massSolute = v * p.ds;
       const massSolvent = (100 - v) * p.dv;
@@ -401,11 +401,11 @@ const CONVERTERS = {
         answer: ans, answerText: `Percentage by mass = ${fmt(ans)} %`,
         steps: [
           { strategy: 'Take 100 mL of solution. The percentage by volume gives mL of solute; the rest is solvent. ' + ADDITIVITY_NOTE,
-            math: `V(solute) = ${fmt(v)} mL, V(solvent) = ${fmt(100 - v)} mL` },
+            math: `V<sub>solute</sub> = % V/V × V<sub>solution</sub> = ${fmt(v)}% × 100 mL = ${fmt(v)} mL<br>V<sub>solvent</sub> = V<sub>solution</sub> − V<sub>solute</sub> = 100 − ${fmt(v)} = ${fmt(100 - v)} mL` },
           { strategy: 'Convert each volume to a mass using its density.',
-            math: `mass(solute) = ${fmt(v)} × ${fmt(p.ds)} = ${fmt(massSolute)} g<br>mass(solvent) = ${fmt(100 - v)} × ${fmt(p.dv)} = ${fmt(massSolvent)} g` },
+            math: `m<sub>solute</sub> = V<sub>solute</sub> × ρ<sub>solute</sub> = ${fmt(v)} × ${fmt(p.ds)} = ${fmt(massSolute)} g<br>m<sub>solvent</sub> = V<sub>solvent</sub> × ρ<sub>solvent</sub> = ${fmt(100 - v)} × ${fmt(p.dv)} = ${fmt(massSolvent)} g` },
           { strategy: 'Percentage by mass = mass of solute ÷ total mass × 100.',
-            math: `% w/w = ${frac(fmt(massSolute), fmt(massSolute) + ' + ' + fmt(massSolvent))} × 100 = ${fmt(ans)} %` }
+            math: `% w/w = ${frac('m<sub>solute</sub>', 'm<sub>solute</sub> + m<sub>solvent</sub>')} × 100 = ${frac(fmt(massSolute), fmt(massSolute) + ' + ' + fmt(massSolvent))} × 100 = ${fmt(ans)} %` }
         ]
       };
     }
@@ -413,7 +413,7 @@ const CONVERTERS = {
 
   'volume_percent|mole_fraction': {
     requires: ['ds', 'dv', 'Ms', 'Mv'],
-    oneLine: frac('P<sub>v</sub> · ρ(solute) · M(solvent)', 'P<sub>v</sub> · ρ(solute) · M(solvent) + (100 − P<sub>v</sub>) · ρ(solvent) · M(solute)'),
+    oneLine: frac('% V/V · ρ<sub>solute</sub> · M<sub>r</sub>(solvent)', '% V/V · ρ<sub>solute</sub> · M<sub>r</sub>(solvent) + (100 − % V/V) · ρ<sub>solvent</sub> · M<sub>r</sub>(solute)'),
     compute: (v, p) => {
       const nSolute = (v * p.ds) / p.Ms;
       const nSolvent = ((100 - v) * p.dv) / p.Mv;
@@ -422,11 +422,11 @@ const CONVERTERS = {
         answer: ans, answerText: `Mole fraction of solute = ${fmt(ans)}`,
         steps: [
           { strategy: 'Take 100 mL of solution. The percentage by volume gives mL of solute; the rest is solvent. ' + ADDITIVITY_NOTE,
-            math: `V(solute) = ${fmt(v)} mL, V(solvent) = ${fmt(100 - v)} mL` },
+            math: `V<sub>solute</sub> = % V/V × V<sub>solution</sub> = ${fmt(v)}% × 100 mL = ${fmt(v)} mL<br>V<sub>solvent</sub> = V<sub>solution</sub> − V<sub>solute</sub> = 100 − ${fmt(v)} = ${fmt(100 - v)} mL` },
           { strategy: 'Convert each volume → mass (density) → moles (molar mass).',
-            math: `n(solute) = ${frac(fmt(v) + ' × ' + fmt(p.ds), fmt(p.Ms))} = ${fmt(nSolute)} mol<br>n(solvent) = ${frac(fmt(100 - v) + ' × ' + fmt(p.dv), fmt(p.Mv))} = ${fmt(nSolvent)} mol` },
+            math: `n<sub>solute</sub> = ${frac('V<sub>solute</sub> × ρ<sub>solute</sub>', 'M<sub>r</sub>(solute)')} = ${frac(fmt(v) + ' × ' + fmt(p.ds), fmt(p.Ms))} = ${fmt(nSolute)} mol<br>n<sub>solvent</sub> = ${frac('V<sub>solvent</sub> × ρ<sub>solvent</sub>', 'M<sub>r</sub>(solvent)')} = ${frac(fmt(100 - v) + ' × ' + fmt(p.dv), fmt(p.Mv))} = ${fmt(nSolvent)} mol` },
           { strategy: 'Mole fraction of solute = moles of solute ÷ total moles.',
-            math: `x = ${frac(fmt(nSolute), fmt(nSolute) + ' + ' + fmt(nSolvent))} = ${fmt(ans)}` }
+            math: `X<sub>solute</sub> = ${frac('n<sub>solute</sub>', 'n<sub>solute</sub> + n<sub>solvent</sub>')} = ${frac(fmt(nSolute), fmt(nSolute) + ' + ' + fmt(nSolvent))} = ${fmt(ans)}` }
         ]
       };
     }
@@ -435,7 +435,7 @@ const CONVERTERS = {
   /* ---------- FROM MOLE FRACTION (basis: 1 mol of solution total) ---------- */
   'mole_fraction|molarity': {
     requires: ['Ms', 'Mv', 'd'],
-    oneLine: frac('1000 · x · ρ', 'x · M(solute) + (1 − x) · M(solvent)'),
+    oneLine: frac('1000 · X<sub>solute</sub> · ρ<sub>solution</sub>', 'X<sub>solute</sub> · M<sub>r</sub>(solute) + (1 − X<sub>solute</sub>) · M<sub>r</sub>(solvent)'),
     compute: (v, p) => {
       const nSolute = v, nSolvent = 1 - v;
       const massSol = nSolute * p.Ms + nSolvent * p.Mv;
@@ -445,11 +445,11 @@ const CONVERTERS = {
         answer: ans, answerText: `Molarity = ${fmt(ans)} mol dm⁻³`,
         steps: [
           { strategy: 'Take 1 mol of solution in total. The mole fraction splits it into moles of solute and moles of solvent.',
-            math: `n(solute) = ${fmt(v)} mol, n(solvent) = ${fmt(1 - v)} mol` },
+            math: `n<sub>solute</sub> = X<sub>solute</sub> × n<sub>total</sub> = ${fmt(v)} × 1 = ${fmt(v)} mol<br>n<sub>solvent</sub> = (1 − X<sub>solute</sub>) × n<sub>total</sub> = (1 − ${fmt(v)}) × 1 = ${fmt(1 - v)} mol` },
           { strategy: 'Find the total mass (each moles × molar mass), then use density to get the volume of solution in litres.',
-            math: `mass(solution) = ${fmt(v)}×${fmt(p.Ms)} + ${fmt(1 - v)}×${fmt(p.Mv)} = ${fmt(massSol)} g<br>V(solution) = ${frac(fmt(massSol), fmt(p.d) + ' × 1000')} = ${fmt(volSol)} L` },
+            math: `m<sub>solution</sub> = n<sub>solute</sub> × M<sub>r</sub>(solute) + n<sub>solvent</sub> × M<sub>r</sub>(solvent) = ${fmt(v)}×${fmt(p.Ms)} + ${fmt(1 - v)}×${fmt(p.Mv)} = ${fmt(massSol)} g<br>V<sub>solution</sub> = ${frac('m<sub>solution</sub>', 'ρ<sub>solution</sub> × 1000')} = ${frac(fmt(massSol), fmt(p.d) + ' × 1000')} = ${fmt(volSol)} L` },
           { strategy: 'Molarity = moles of solute ÷ litres of solution.',
-            math: `M = ${frac(fmt(v), fmt(volSol))} = ${fmt(ans)} mol dm⁻³` }
+            math: `M = ${frac('n<sub>solute</sub>', 'V<sub>solution</sub>')} = ${frac(fmt(v), fmt(volSol))} = ${fmt(ans)} mol dm⁻³` }
         ]
       };
     }
@@ -457,7 +457,7 @@ const CONVERTERS = {
 
   'mole_fraction|molality': {
     requires: ['Mv'],
-    oneLine: frac('1000 · x', '(1 − x) · M(solvent)'),
+    oneLine: frac('1000 · X<sub>solute</sub>', '(1 − X<sub>solute</sub>) · M<sub>r</sub>(solvent)'),
     compute: (v, p) => {
       const nSolute = v, nSolvent = 1 - v;
       const massSolvent = nSolvent * p.Mv;
@@ -466,11 +466,11 @@ const CONVERTERS = {
         answer: ans, answerText: `Molality = ${fmt(ans)} mol kg⁻¹`,
         steps: [
           { strategy: 'Take 1 mol of solution in total. The mole fraction gives moles of solute and moles of solvent.',
-            math: `n(solute) = ${fmt(v)} mol, n(solvent) = ${fmt(1 - v)} mol` },
+            math: `n<sub>solute</sub> = X<sub>solute</sub> × n<sub>total</sub> = ${fmt(v)} × 1 = ${fmt(v)} mol<br>n<sub>solvent</sub> = (1 − X<sub>solute</sub>) × n<sub>total</sub> = (1 − ${fmt(v)}) × 1 = ${fmt(1 - v)} mol` },
           { strategy: 'Convert the moles of solvent into a mass in kilograms.',
-            math: `mass(solvent) = ${fmt(1 - v)} × ${fmt(p.Mv)} = ${fmt(massSolvent)} g = ${fmt(massSolvent/1000)} kg` },
+            math: `m<sub>solvent</sub> = n<sub>solvent</sub> × M<sub>r</sub>(solvent) = ${fmt(1 - v)} × ${fmt(p.Mv)} = ${fmt(massSolvent)} g = ${fmt(massSolvent/1000)} kg` },
           { strategy: 'Molality = moles of solute ÷ kilograms of solvent.',
-            math: `m = ${frac(fmt(v), fmt(massSolvent/1000))} = ${fmt(ans)} mol kg⁻¹` }
+            math: `<i>m</i> = ${frac('n<sub>solute</sub>', 'm<sub>solvent</sub>')} = ${frac(fmt(v), fmt(massSolvent/1000))} = ${fmt(ans)} mol kg⁻¹` }
         ]
       };
     }
@@ -478,7 +478,7 @@ const CONVERTERS = {
 
   'mole_fraction|mass_percent': {
     requires: ['Ms', 'Mv'],
-    oneLine: frac('100 · x · M(solute)', 'x · M(solute) + (1 − x) · M(solvent)'),
+    oneLine: frac('100 · X<sub>solute</sub> · M<sub>r</sub>(solute)', 'X<sub>solute</sub> · M<sub>r</sub>(solute) + (1 − X<sub>solute</sub>) · M<sub>r</sub>(solvent)'),
     compute: (v, p) => {
       const massSolute = v * p.Ms;
       const massSolvent = (1 - v) * p.Mv;
@@ -487,11 +487,11 @@ const CONVERTERS = {
         answer: ans, answerText: `Percentage by mass = ${fmt(ans)} %`,
         steps: [
           { strategy: 'Take 1 mol of solution in total. The mole fraction gives moles of solute and solvent.',
-            math: `n(solute) = ${fmt(v)} mol, n(solvent) = ${fmt(1 - v)} mol` },
+            math: `n<sub>solute</sub> = X<sub>solute</sub> × n<sub>total</sub> = ${fmt(v)} × 1 = ${fmt(v)} mol<br>n<sub>solvent</sub> = (1 − X<sub>solute</sub>) × n<sub>total</sub> = (1 − ${fmt(v)}) × 1 = ${fmt(1 - v)} mol` },
           { strategy: 'Convert each to a mass using its molar mass.',
-            math: `mass(solute) = ${fmt(v)} × ${fmt(p.Ms)} = ${fmt(massSolute)} g<br>mass(solvent) = ${fmt(1 - v)} × ${fmt(p.Mv)} = ${fmt(massSolvent)} g` },
+            math: `m<sub>solute</sub> = n<sub>solute</sub> × M<sub>r</sub>(solute) = ${fmt(v)} × ${fmt(p.Ms)} = ${fmt(massSolute)} g<br>m<sub>solvent</sub> = n<sub>solvent</sub> × M<sub>r</sub>(solvent) = ${fmt(1 - v)} × ${fmt(p.Mv)} = ${fmt(massSolvent)} g` },
           { strategy: 'Percentage by mass = mass of solute ÷ total mass × 100.',
-            math: `% w/w = ${frac(fmt(massSolute), fmt(massSolute) + ' + ' + fmt(massSolvent))} × 100 = ${fmt(ans)} %` }
+            math: `% w/w = ${frac('m<sub>solute</sub>', 'm<sub>solute</sub> + m<sub>solvent</sub>')} × 100 = ${frac(fmt(massSolute), fmt(massSolute) + ' + ' + fmt(massSolvent))} × 100 = ${fmt(ans)} %` }
         ]
       };
     }
@@ -499,7 +499,7 @@ const CONVERTERS = {
 
   'mole_fraction|volume_percent': {
     requires: ['Ms', 'Mv', 'ds', 'dv'],
-    oneLine: frac('100 · x · M(solute) · ρ(solvent)', 'x · M(solute) · ρ(solvent) + (1 − x) · M(solvent) · ρ(solute)'),
+    oneLine: frac('100 · X<sub>solute</sub> · M<sub>r</sub>(solute) · ρ<sub>solvent</sub>', 'X<sub>solute</sub> · M<sub>r</sub>(solute) · ρ<sub>solvent</sub> + (1 − X<sub>solute</sub>) · M<sub>r</sub>(solvent) · ρ<sub>solute</sub>'),
     compute: (v, p) => {
       const volSolute = (v * p.Ms) / p.ds;
       const volSolvent = ((1 - v) * p.Mv) / p.dv;
@@ -508,11 +508,11 @@ const CONVERTERS = {
         answer: ans, answerText: `Percentage by volume = ${fmt(ans)} %`,
         steps: [
           { strategy: 'Take 1 mol of solution in total. The mole fraction gives moles of solute and solvent. ' + ADDITIVITY_NOTE,
-            math: `n(solute) = ${fmt(v)} mol, n(solvent) = ${fmt(1 - v)} mol` },
+            math: `n<sub>solute</sub> = X<sub>solute</sub> × n<sub>total</sub> = ${fmt(v)} × 1 = ${fmt(v)} mol<br>n<sub>solvent</sub> = (1 − X<sub>solute</sub>) × n<sub>total</sub> = (1 − ${fmt(v)}) × 1 = ${fmt(1 - v)} mol` },
           { strategy: 'Convert each to a volume: moles → mass (molar mass) → volume (density).',
-            math: `V(solute) = ${frac(fmt(v) + ' × ' + fmt(p.Ms), fmt(p.ds))} = ${fmt(volSolute)} mL<br>V(solvent) = ${frac(fmt(1 - v) + ' × ' + fmt(p.Mv), fmt(p.dv))} = ${fmt(volSolvent)} mL` },
+            math: `V<sub>solute</sub> = ${frac('n<sub>solute</sub> × M<sub>r</sub>(solute)', 'ρ<sub>solute</sub>')} = ${frac(fmt(v) + ' × ' + fmt(p.Ms), fmt(p.ds))} = ${fmt(volSolute)} mL<br>V<sub>solvent</sub> = ${frac('n<sub>solvent</sub> × M<sub>r</sub>(solvent)', 'ρ<sub>solvent</sub>')} = ${frac(fmt(1 - v) + ' × ' + fmt(p.Mv), fmt(p.dv))} = ${fmt(volSolvent)} mL` },
           { strategy: 'Percentage by volume = volume of solute ÷ total volume × 100.',
-            math: `% v/v = ${frac(fmt(volSolute), fmt(volSolute) + ' + ' + fmt(volSolvent))} × 100 = ${fmt(ans)} %` }
+            math: `% V/V = ${frac('V<sub>solute</sub>', 'V<sub>solute</sub> + V<sub>solvent</sub>')} × 100 = ${frac(fmt(volSolute), fmt(volSolute) + ' + ' + fmt(volSolvent))} × 100 = ${fmt(ans)} %` }
         ]
       };
     }
