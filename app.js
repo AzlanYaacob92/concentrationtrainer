@@ -353,26 +353,36 @@
     return parts.map(s => s.trim());
   }
 
-  // Lay a math string out so every '=' stacks in its own column. Each
-  // <br>-separated equation becomes a grid row; the label (left of the first
-  // '=') is right-aligned to hug the '=', results are left-aligned.
+  // Lay a math string out textbook-style: the quantity (left of the first
+  // '=') appears once, and every subsequent '='-separated segment gets its
+  // own row with the '=' signs stacked in a shared column —
+  //     n(solute) = m / Mr
+  //               = 0.5 / 98
+  //               = 0.0051 mol
+  // One segment per row keeps every row narrow, so steps never need a
+  // horizontal scrollbar. <br>-separated equations continue in the same
+  // grid, so their '=' column stays aligned too.
   function mathGrid(html) {
     const lines = String(html).split(/<br\s*\/?>/i);
-    const rows = lines.map(splitTopLevelEquals);
-    const maxSegs = Math.max(1, ...rows.map(r => r.length));
-    const cols = 2 * maxSegs - 1;
     let cells = '';
-    rows.forEach((segs, ri) => {
-      const multi = segs.length > 1;
-      segs.forEach((seg, si) => {
-        if (si > 0) {
-          cells += `<span class="eq-op" style="grid-column:${2 * si};grid-row:${ri + 1}">=</span>`;
+    let row = 0;
+    lines.forEach(line => {
+      const segs = splitTopLevelEquals(line);
+      if (segs.length === 1) {
+        row += 1;
+        cells += `<span class="eq-seg eq-solo" style="grid-column:1 / -1;grid-row:${row}">${segs[0]}</span>`;
+        return;
+      }
+      segs.slice(1).forEach((seg, si) => {
+        row += 1;
+        if (si === 0) {
+          cells += `<span class="eq-seg eq-lhs" style="grid-column:1;grid-row:${row}">${segs[0]}</span>`;
         }
-        const cls = !multi ? 'eq-solo' : (si === 0 ? 'eq-lhs' : 'eq-rhs');
-        cells += `<span class="eq-seg ${cls}" style="grid-column:${2 * si + 1};grid-row:${ri + 1}">${seg}</span>`;
+        cells += `<span class="eq-op" style="grid-column:2;grid-row:${row}">=</span>`;
+        cells += `<span class="eq-seg eq-rhs" style="grid-column:3;grid-row:${row}">${seg}</span>`;
       });
     });
-    return `<span class="eqgrid" style="grid-template-columns:repeat(${cols}, auto)">${cells}</span>`;
+    return `<span class="eqgrid" style="grid-template-columns:max-content max-content minmax(0, max-content)">${cells}</span>`;
   }
 
   // Render a math grid into an element, revealing its equation rows with a
