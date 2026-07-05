@@ -4,6 +4,35 @@
    builds the interface and wires up interactions.
    ============================================================= */
 
+/* ---------------- theme toggle ----------------
+   Independent of the main IIFE below since it doesn't need
+   chemistry.js — it only flips the data-theme attribute that the
+   dark-mode CSS variables key off, and remembers the choice. */
+(function () {
+  const toggleBtn = document.getElementById('theme-toggle');
+  const icon = document.getElementById('theme-toggle-icon');
+  if (!toggleBtn) return;
+  const root = document.documentElement;
+
+  function isDark() { return root.getAttribute('data-theme') === 'dark'; }
+
+  function reflect() {
+    const dark = isDark();
+    toggleBtn.setAttribute('aria-pressed', String(dark));
+    toggleBtn.setAttribute('aria-label', dark ? 'Switch to light mode' : 'Switch to dark mode');
+    if (icon) icon.textContent = dark ? '☀️' : '🌙';
+  }
+
+  reflect(); // match whatever the inline head script already applied
+
+  toggleBtn.addEventListener('click', () => {
+    const next = isDark() ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    try { localStorage.setItem('theme', next); } catch (e) { /* private browsing, etc. */ }
+    reflect();
+  });
+})();
+
 (function () {
   const { MEASURES, MEASURE_ORDER, FIELDS, getConverter, fmt } = window.CHEM;
 
@@ -384,7 +413,7 @@
     const titles = STEP_TITLES[key] || [];
     const converter = getConverter(fromId, toId);
     // mole fraction has no unit — show just the number
-    const unit = target.unit === '' ? '' : (target.formulaSymbol || target.symbol);
+    const unit = target.unit === '' ? '' : target.symbol;
 
     const stepsHtml = result.steps.map((step, i) => `
       <li class="worksheet-step">
