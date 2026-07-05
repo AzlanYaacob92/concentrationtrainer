@@ -69,8 +69,50 @@
   --amber-panel-border: #6b4a12;
   --amber-panel-text:   #f0c473;
 
+  /* Brand accents remapped to the stoichiometry palette: bright cyan
+     for teal, gold for amber. Same variable names as light mode, new
+     hues — downstream rules (eyebrows, focus rings, borders, primary
+     button) pick up the accent shift automatically without needing
+     dozens of individual overrides.
+        --teal-50, --teal-900, --teal-950 are NOT remapped: they're
+     also used as LIGHT TEXT inside dark teal cards (the strategy
+     zone, the worksheet header, the Learn answer callout), which
+     stay dark in both modes. The few places those tokens were used
+     as light backgrounds or dark ink are pinned separately below. */
+  --teal-600: #2dd4bf;
+  --teal-700: #2dd4bf;
+  --teal-100: #2a6b63;
+
+  --amber-500: #f5b942;
+  --amber-600: #f5b942;
+  --amber-100: #3a3220;
+
   --shadow: 0 18px 40px -20px rgba(0, 0, 0, .85);
 }
+
+/* ---------- dark-mode specific overrides ----------
+   Rules where a brand token was doing double duty — e.g. --teal-900
+   is a dark surface for the strategy zone AND was the dark ink colour
+   for the site title. Remapping the token would break one of the two,
+   so those usages are pinned to the right theme-aware token here.  */
+[data-theme="dark"] .site-title,
+[data-theme="dark"] .choice-verb,
+[data-theme="dark"] .solution-heading,
+[data-theme="dark"] .worksheet-step-title,
+[data-theme="dark"] .worksheet-oneline-formula { color: var(--ink); }
+
+[data-theme="dark"] .back-link:hover { color: #7af2e4; }
+
+/* Ghost-button hover was a very light teal wash; in dark mode make it
+   the deep accent-soft the stoichiometry tool uses for pressed states. */
+[data-theme="dark"] .btn--ghost:hover { background: #0f3b37; }
+
+/* Primary CTA becomes bright cyan bg — flip its text to dark so it's
+   readable, and give it a slightly brighter cyan on hover (like the
+   stoichiometry .cell.sel highlight) instead of the light-mode
+   darker-teal hover, which would dim a bright button. */
+[data-theme="dark"] .btn--primary { color: #06231f; }
+[data-theme="dark"] .btn--primary:hover { background: #7af2e4; box-shadow: 0 6px 16px rgba(45, 212, 191, .35); }
 
 * { box-sizing: border-box; }
 
