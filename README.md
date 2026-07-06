@@ -74,4 +74,4 @@ there's no build step.
   (a standard simplifying assumption at this level, not exact for all real liquid pairs).
 - Field requirements are computed automatically per conversion pair — e.g. molarity→molality only
   asks for molar mass and density; molarity→mole fraction also asks for the solvent's molar mass.
-  Only what's needed for a given conversion appears.
+  Only what's needed for a given conversion appears. 
