@@ -1,160 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Chemculate Concentration</title>
-  <script>
-    // Applied before the stylesheet loads so the page never flashes the
-    // wrong theme. Remembers the student's choice; falls back to their
-    // system preference the first time they visit.
-    (function () {
-      try {
-        var saved = localStorage.getItem('theme');
-        var theme = saved || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-        document.documentElement.setAttribute('data-theme', theme);
-      } catch (e) { /* localStorage unavailable — default light styles apply */ }
-    })();
-  </script>
-  <link rel="stylesheet" href="styles.css" />
+<meta charset="UTF-8">
+<title>Redirecting…</title>
+<meta http-equiv="refresh" content="0; url=https://chemculateconcentration.netlify.app/">
+<link rel="canonical" href="https://chemculateconcentration.netlify.app/">
+<script>
+  window.location.replace("https://chemculateconcentration.netlify.app/");
+</script>
+<style>
+  body {
+    font-family: system-ui, sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    margin: 0;
+    background: #f7f5f0;
+    color: #1f2937;
+  }
+  .box { text-align: center; padding: 24px; }
+  a { color: #0d9488; font-weight: 600; }
+</style>
 </head>
 <body>
-  <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch to dark mode" aria-pressed="false">
-    <span id="theme-toggle-icon" aria-hidden="true">🌙</span>
-  </button>
-
-  <header class="site-header">
-    <span class="eyebrow">Solution Concentration</span>
-    <h1 class="site-title">Chemculate Concentration</h1>
-  </header>
-
-  <main>
-    <!-- ============ SCREEN 1 · LANDING ============ -->
-    <section id="screen-landing" class="screen is-active">
-      <div class="landing-content" id="landing-content">
-<a class="back-link" href="https://chemculator.netlify.app/">← Chemculator home</a>
-        <p class="hero-lead">I am here today to…</p>
-        <div class="choice-grid">
-          <button class="choice-card" data-goto="learn" type="button">
-            <span class="choice-verb">Learn</span>
-            <span class="choice-desc">Walk me through a conversion, one step at a time — the thinking first, then the numbers.</span>
-          </button>
-          <button class="choice-card choice-card--amber" data-goto="check" type="button">
-            <span class="choice-verb">Check My Answers</span>
-            <span class="choice-desc">I have already worked it out. Convert it for me so I can compare.</span>
-          </button>
-        </div>
-      </div>
-    </section>
-
-    <!-- ============ SCREEN 2 · LEARN ============ -->
-    <section id="screen-learn" class="screen">
-      <button class="back-link" data-goto="landing" type="button">← Back to start</button>
-
-      <div class="wizard-stage" id="learn-stage">
-
-        <!-- Step 1: target -->
-        <div class="prompt-card wizard-card" id="learn-prompt-target">
-          <span class="prompt-step">Step 1</span>
-          <label class="prompt-question" for="learn-target">What kind of concentration are you trying to calculate?</label>
-          <select id="learn-target" class="select"></select>
-        </div>
-
-        <!-- Step 2: source -->
-        <div class="prompt-card wizard-card" id="learn-prompt-source" hidden>
-          <span class="prompt-step">Step 2</span>
-          <label class="prompt-question" for="learn-source">What concentration do you already have?</label>
-          <select id="learn-source" class="select"></select>
-          <div class="wizard-back-row">
-            <button class="btn btn--ghost wizard-back" id="learn-back-to-1" type="button">← Back</button>
-          </div>
-        </div>
-
-        <!-- Step 3: fields -->
-        <div class="fields-card wizard-card" id="learn-fields" hidden>
-          <span class="prompt-step">Step 3</span>
-          <p class="prompt-question" id="learn-fields-title">Fill in what you know</p>
-          <div class="field-list" id="learn-field-list"></div>
-          <p class="form-error" id="learn-error" hidden></p>
-          <button class="btn btn--primary" id="learn-start" type="button">Work it out</button>
-          <div class="wizard-back-row">
-            <button class="btn btn--ghost wizard-back" id="learn-back-to-2" type="button">← Back</button>
-          </div>
-        </div>
-
-        <!-- Step working: strategy (deep teal) + calculation (white), combined, one step at a time -->
-        <div class="step-combo wizard-card" id="learn-combo" hidden>
-          <div class="step-strategy-zone">
-            <span class="strategy-eyebrow">Strategy</span>
-            <p class="strategy-instruction" id="learn-combo-instruction"></p>
-            <p class="strategy-text" id="learn-combo-strategy"></p>
-            <p class="strategy-footnote" id="learn-combo-footnote" hidden></p>
-          </div>
-          <div class="step-calc-zone">
-            <span class="math-eyebrow">Calculation</span>
-            <p class="math-typed" id="learn-combo-math"></p>
-          </div>
-          <div class="step-combo-actions">
-            <button class="btn btn--primary" id="learn-combo-next" type="button">Show the calculation</button>
-          </div>
-        </div>
-
-        <!-- Final answer (deeper teal, bigger) -->
-        <div class="answer-callout answer-callout--learn wizard-card" id="learn-answer" hidden>
-          <span class="answer-eyebrow">Final answer</span>
-          <p class="answer-value" id="learn-answer-value"></p>
-          <button class="btn btn--ghost" id="learn-reveal-working" type="button">Reveal overall working</button>
-        </div>
-
-        <!-- Pure working summary: every step's calculation only, no strategy -->
-        <div class="solution wizard-card" id="learn-full-working" hidden>
-          <h2 class="solution-heading">Solution</h2>
-          <div class="reveal-list" id="learn-full-working-list"></div>
-          <button class="btn btn--ghost" id="learn-restart" type="button">Start a new one</button>
-        </div>
-
-      </div>
-    </section>
-
-    <!-- ============ SCREEN 3 · CHECK MY ANSWERS ============ -->
-    <section id="screen-check" class="screen">
-      <button class="back-link" data-goto="landing" type="button">← Back to start</button>
-
-      <div class="converter-bar">
-        <div class="converter-field">
-          <label class="field-label" for="check-from">Convert from</label>
-          <select id="check-from" class="select"><option value="">Choose a measure…</option></select>
-        </div>
-        <span class="converter-arrow" aria-hidden="true">→</span>
-        <div class="converter-field">
-          <label class="field-label" for="check-to">Convert to</label>
-          <select id="check-to" class="select"><option value="">Choose a measure…</option></select>
-        </div>
-      </div>
-
-      <div class="fields-card" id="check-fields" hidden>
-        <div class="field-list" id="check-field-list"></div>
-        <p class="form-error" id="check-error" hidden></p>
-        <div class="check-actions">
-          <button class="btn btn--primary" id="check-run" type="button">Convert</button>
-          <button class="btn btn--ghost" id="check-clear" type="button">Clear fields</button>
-        </div>
-      </div>
-
-      <div class="solution" id="check-solution" hidden>
-        <div class="reveal-list" id="check-reveal-list"></div>
-      </div>
-
-      <p class="fineprint">Percentages entered as 0–100 · mole fraction as 0–1 (fraction of solute)</p>
-    </section>
-  </main>
-
-  <footer class="site-footer">
-    <p>Concentrations interconverted with full working</p>
-  </footer>
-
-  <!-- logic first, then the app that uses it -->
-  <script src="chemistry.js"></script>
-  <script src="app.js"></script>
+  <div class="box">
+    <p>This page has moved.</p>
+    <p>Redirecting you to <a href="https://chemculateconcentration.netlify.app/">chemculateconcentration.netlify.app</a>…</p>
+  </div>
 </body>
 </html>
