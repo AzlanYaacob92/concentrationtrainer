@@ -257,8 +257,11 @@
       const num = Number(raw);
       if (!isFinite(num)) return { ok: false, message: `"${raw}" is not a valid number.` };
       if (inp.isSourceValue) {
+        // Exclusive at both ends: at the endpoints there is no solvent (or no
+        // solute), which is not a solution and makes every conversion divide
+        // by zero. See the note on MEASURES in chemistry.js.
         const m = MEASURES[sourceMeasure];
-        if (num < m.min || num > m.max) {
+        if (num <= m.min || num >= m.max) {
           return { ok: false, message: `${m.valueLabel} should be ${m.rangeHint}.` };
         }
       } else if (num <= 0) {
@@ -576,6 +579,13 @@
     learnError.hidden = true;
     const converter = getConverter(from, to);
     const result = converter.compute(check.values.sourceValue, check.values);
+    if (result.error) {
+      // Stay on the fields card and explain — walking a student through
+      // working that ends in an impossible answer teaches the wrong thing.
+      learnError.textContent = result.error;
+      learnError.hidden = false;
+      return;
+    }
     learnState = { steps: result.steps, answerText: result.answerText, stepIndex: 0, calcShown: false };
 
     panTransition(fieldsCard, comboCard, 'forward', renderComboStep);
@@ -674,6 +684,14 @@
     checkError.hidden = true;
     const converter = getConverter(from, to);
     const result = converter.compute(check.values.sourceValue, check.values);
+    if (result.error) {
+      // The algebra ran but the answer is not physically possible — say why
+      // rather than showing a negative or blank result. See chemistry.js.
+      checkError.textContent = result.error;
+      checkError.hidden = false;
+      checkSolution.hidden = true;
+      return;
+    }
 
     checkRevealList.innerHTML = '';
     checkRevealList.appendChild(renderWorksheet(from, to, result));

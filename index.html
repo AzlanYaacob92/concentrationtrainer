@@ -4,6 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Chemculate Concentration</title>
+  <meta name="description" content="Convert between molarity, molality, percentage by mass, percentage by volume and mole fraction, with the full working shown one step at a time." />
+  <!-- Inline SVG favicon: no extra request, no file to lose. -->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext y='26' font-size='26'%3E%F0%9F%A7%AA%3C/text%3E%3C/svg%3E" />
   <script>
     // Applied before the stylesheet loads so the page never flashes the
     // wrong theme. Remembers the student's choice; falls back to their
@@ -75,7 +78,7 @@
           <span class="prompt-step">Step 3</span>
           <p class="prompt-question" id="learn-fields-title">Fill in what you know</p>
           <div class="field-list" id="learn-field-list"></div>
-          <p class="form-error" id="learn-error" hidden></p>
+          <p class="form-error" id="learn-error" role="alert" hidden></p>
           <button class="btn btn--primary" id="learn-start" type="button">Work it out</button>
           <div class="wizard-back-row">
             <button class="btn btn--ghost wizard-back" id="learn-back-to-2" type="button">← Back</button>
@@ -134,7 +137,7 @@
 
       <div class="fields-card" id="check-fields" hidden>
         <div class="field-list" id="check-field-list"></div>
-        <p class="form-error" id="check-error" hidden></p>
+        <p class="form-error" id="check-error" role="alert" hidden></p>
         <div class="check-actions">
           <button class="btn btn--primary" id="check-run" type="button">Convert</button>
           <button class="btn btn--ghost" id="check-clear" type="button">Clear fields</button>
@@ -145,12 +148,13 @@
         <div class="reveal-list" id="check-reveal-list"></div>
       </div>
 
-      <p class="fineprint">Percentages entered as 0–100 · mole fraction as 0–1 (fraction of solute)</p>
+      <p class="fineprint">Percentages entered between 0 and 100 · mole fraction between 0 and 1 (fraction of solute) · both ends excluded, since a solution needs some of each</p>
     </section>
   </main>
 
   <footer class="site-footer">
     <p>Concentrations interconverted with full working</p>
+    <p>Percentage-by-volume conversions assume volumes are additive (V<sub>solution</sub> = V<sub>solute</sub> + V<sub>solvent</sub>) — a good approximation, but not exact for real liquids. Answers are given to 4 significant figures. This tool shows the method; always re-check against your own mark scheme.</p>
   </footer>
 
   <!-- logic first, then the app that uses it -->

@@ -29,17 +29,25 @@ const MEASURES = {
   },
   mass_percent: {
     id: 'mass_percent', name: 'Percentage by mass', symbol: '% w/w', unit: '%', formulaSymbol: '% w/w',
-    valueLabel: 'Percentage by mass', min: 0, max: 100, rangeHint: 'a value between 0 and 100'
+    valueLabel: 'Percentage by mass', min: 0, max: 100,
+    rangeHint: 'greater than 0 and less than 100 — at exactly 100 % there is no solvent left, so it is no longer a solution'
   },
   volume_percent: {
     id: 'volume_percent', name: 'Percentage by volume', symbol: '% V/V', unit: '%', formulaSymbol: '% V/V',
-    valueLabel: 'Percentage by volume', min: 0, max: 100, rangeHint: 'a value between 0 and 100'
+    valueLabel: 'Percentage by volume', min: 0, max: 100,
+    rangeHint: 'greater than 0 and less than 100 — at exactly 100 % there is no solvent left, so it is no longer a solution'
   },
   mole_fraction: {
     id: 'mole_fraction', name: 'Mole fraction', symbol: 'X', unit: '', formulaSymbol: 'X<sub>solute</sub>',
-    valueLabel: 'Mole fraction of solute', min: 0, max: 1, rangeHint: 'a value between 0 and 1'
+    valueLabel: 'Mole fraction of solute', min: 0, max: 1,
+    rangeHint: 'greater than 0 and less than 1 — at exactly 1 there is no solvent left, so it is no longer a solution'
   }
 };
+
+/* Note on the ranges above: they are open at both ends. A solution needs
+   some solute AND some solvent, so 0 and the maximum both describe a pure
+   substance rather than a solution, and every conversion from them divides
+   by zero. app.js validates them exclusively. */
 
 /* order used in dropdowns */
 const MEASURE_ORDER = ['molarity', 'molality', 'volume_percent', 'mass_percent', 'mole_fraction'];
@@ -551,6 +559,55 @@ Object.keys(CONVERTERS).forEach(key => {
       result.steps[0] = Object.assign({}, result.steps[0], { footnote: note });
     }
     return result;
+  };
+});
+
+/* =============================================================
+   PHYSICAL PLAUSIBILITY GUARD
+
+   The converters are honest algebra, and honest algebra will happily
+   return a negative or infinite answer when the numbers a student typed
+   cannot describe a real solution. The commonest case: a molarity too
+   high for the density given, so (1000·ρ − M·Mr) — the mass of solvent —
+   comes out zero or negative. Left alone the app reports a negative
+   molality with a straight face, or prints a bare "—".
+
+   Rather than bolt a check onto all 20 converters, wrap compute() once
+   and sanity-check what comes out. A failed check returns
+   { error: <message> } and app.js shows it instead of the working.
+   ============================================================= */
+function implausibleResult(fromId, toId, answer) {
+  const from = MEASURES[fromId], to = MEASURES[toId];
+
+  if (!isFinite(answer)) {
+    return `Those numbers leave no solvent at all, so the ${to.name.toLowerCase()} ` +
+           `cannot be worked out (the calculation divides by zero). Check the ` +
+           `${from.valueLabel.toLowerCase()} and the densities — a very high ` +
+           `${from.valueLabel.toLowerCase()} needs a high solution density to go with it.`;
+  }
+  if (answer <= 0) {
+    return `Those numbers describe an impossible solution — the solute alone would ` +
+           `weigh more than the whole solution, which is why the ${to.name.toLowerCase()} ` +
+           `comes out as ${fmt(answer)}. Check the ${from.valueLabel.toLowerCase()}, the ` +
+           `molar mass of the solute, and the density of the solution against each other.`;
+  }
+  if (answer > to.max) {
+    return `That works out as ${fmt(answer)} ${to.unit}, which is above the maximum ` +
+           `possible ${to.name.toLowerCase()} of ${to.max}${to.unit ? ' ' + to.unit : ''}. ` +
+           `The values entered cannot all be true of the same solution — check them ` +
+           `against each other before trusting any of the working.`;
+  }
+  return null;
+}
+
+Object.keys(CONVERTERS).forEach(key => {
+  const [fromId, toId] = key.split('|');
+  const conv = CONVERTERS[key];
+  const inner = conv.compute;
+  conv.compute = function (v, p) {
+    const result = inner(v, p);
+    const problem = implausibleResult(fromId, toId, result && result.answer);
+    return problem ? { error: problem } : result;
   };
 });
 

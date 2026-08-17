@@ -1,77 +1,60 @@
-# Concentration Trainer — deployment package
+# Chemculate Concentration
 
-This replaces your current site at **azlanyaacob92.github.io/concentrationtrainer**.
+Interconverts the five ways of expressing solution concentration, showing the full working:
 
-## What's changed
+| Measure | Symbol | Unit |
+|---|---|---|
+| Molarity | M | mol dm⁻³ |
+| Molality | *m* | mol kg⁻¹ |
+| Percentage by mass | % w/w | % |
+| Percentage by volume | % V/V | % |
+| Mole fraction of solute | X | — |
 
-- **New landing page** — "I am here today to…" with two buttons: **Learn** and **Check My Answers**.
-- **Learn mode** — two prompts (target measure, then source measure) → data-entry fields → a
-  step-by-step reveal where each step shows the **strategy first**, then a click reveals the
-  **arithmetic**, working through all steps, then a final **answer callout**.
-- **Check My Answers mode** — same from/to converter as your current site, all working shown at
-  once after you press Convert.
-- All **20 directed conversion pairs** (molarity, molality, %w/w, %v/v, mole fraction) verified
-  against textbook values and cross-checked with round-trip tests (A→B→A returns the start value).
-- Same teal/amber visual identity, Georgia display type, clean multi-file structure.
+All 20 directed pairs are supported. Part of the [Chemculator](https://azlanyaacob92.github.io/) suite.
 
-## Files in this package
+## Two modes
+
+- **Learn** — pick the target measure, then the source, then fill in what you know. Each step shows the *strategy* first; a click reveals the *arithmetic*. Ends with the answer and an optional full-working summary.
+- **Check my answers** — a straight from → to converter that shows every step at once, for comparing against work you have already done.
+
+## The method
+
+Every conversion uses the basis method taught in SK015: pick a convenient fixed amount of solution (1 L, 1 kg of solvent, 100 g, 100 mL, or 1 mol total), work out the pieces, then recombine. The three strategy lines a student sees are always the same three moves — find a basis, bridge to what the target needs, apply the definition.
+
+Field requirements are derived per pair, so only the data a given conversion actually needs is asked for.
+
+## Known limitations
+
+- Percentage-by-volume conversions assume volumes are additive (V<sub>solution</sub> = V<sub>solute</sub> + V<sub>solvent</sub>). Standard at this level, not exact for real liquids. The app says so on screen.
+- Answers are given to 4 significant figures.
+- Input ranges are open at both ends — 0 % and 100 % (and X = 0 or 1) describe a pure substance rather than a solution, and every conversion from them divides by zero.
+- Inputs that cannot all be true of the same solution (for example a molarity too high for the density given) are rejected with an explanation rather than being reported as a negative answer.
+- This tool shows the method. Always re-check against your own mark scheme.
+
+## Running it
+
+Static HTML/CSS/JS, no build step and no dependencies. Open `index.html` in a browser, or serve the folder:
+
+```bash
+python3 -m http.server 8000
+```
+
+`index.html` loads `chemistry.js` before `app.js` — that order matters.
+
+## Files
 
 | File | Purpose |
 |---|---|
-| `index.html` | Page structure — landing, Learn, Check My Answers |
-| `styles.css` | All appearance (teal/amber theme) |
-| `chemistry.js` | The chemistry — every conversion formula and its step text, no UI code |
-| `app.js` | The behaviour — screen switching, form building, the reveal flow |
+| `index.html` | Page structure — landing, Learn, Check my answers |
+| `styles.css` | All appearance, including the light/dark themes |
+| `chemistry.js` | The chemistry: every conversion, its step text, and the plausibility guard. No UI code. |
+| `app.js` | The behaviour: screen switching, form building, the reveal flow |
+| `test-chemistry.js` | Smoke test for the engine |
 
-Load order matters: `index.html` loads `chemistry.js` before `app.js`.
+## Tests
 
-## How to upload to your existing repository
+```bash
+node test-chemistry.js
+```
 
-You already have the repo `azlanyaacob92/concentrationtrainer` connected to GitHub Pages, so you
-are just replacing the files inside it.
-
-1. Go to **https://github.com/azlanyaacob92/concentrationtrainer**
-2. For **each of the 4 files** in this package:
-   - Click on the file with the same name in your repo (e.g. `index.html`). If a file doesn't
-     exist yet (e.g. `chemistry.js`), click **Add file → Create new file** instead and type the
-     filename.
-   - Click the **pencil (✎) icon** to edit (skip this for new files).
-   - Select all existing content and delete it.
-   - Open the corresponding file from this package, copy everything, and paste it in.
-   - Scroll down, add a short commit message like `Rebuild: landing page + Learn/Check modes`,
-     and click **Commit changes** (commit directly to `main`).
-3. Repeat for `styles.css`, `app.js`, and `chemistry.js`.
-4. If your repo has any **old files** this version doesn't use (e.g. leftover `config.js`,
-   `format.js`, `conversions.js`, `steps.js`, `ui.js` from the earlier multi-file version), delete
-   them from the repo so nothing conflicting is left over — open each one, click the trash icon,
-   commit the deletion.
-5. Wait about 30–60 seconds, then visit **https://azlanyaacob92.github.io/concentrationtrainer/**
-   (a hard refresh — Ctrl/Cmd+Shift+R — helps if you still see the old version, since GitHub Pages
-   and browsers both cache).
-
-### Alternative: upload as a batch (faster)
-
-Instead of editing file-by-file:
-1. On the repo's main page, click **Add file → Upload files**.
-2. Drag in all 4 files from this package at once — GitHub will overwrite any existing files with
-   the same names automatically.
-3. Delete the leftover old files mentioned in step 4 above if present.
-4. Commit directly to `main`.
-
-## Testing it yourself before/after upload
-
-If you want to preview locally first: put all 4 files in one folder, then open `index.html`
-directly in a browser (double-click it), or run a tiny local server from that folder
-(e.g. `python3 -m http.server 8000` then visit `http://localhost:8000`) — either works since
-there's no build step.
-
-## Notes on the chemistry
-
-- Every conversion works from a **fixed basis** (1 L of solution, 1 kg of solvent, 100 g of
-  solution, 100 mL of solution, or 1 mol total) — the same method used in the SK015 course, and
-  the same reasoning shown to students in each strategy line.
-- Percentage-by-volume conversions carry a visible note that they assume volumes are additive
-  (a standard simplifying assumption at this level, not exact for all real liquid pairs).
-- Field requirements are computed automatically per conversion pair — e.g. molarity→molality only
-  asks for molar mass and density; molarity→mole fraction also asks for the solvent's molar mass.
-  Only what's needed for a given conversion appears. 
+Checks all 20 pairs against one realistic solution and confirms the plausibility guard catches impossible inputs. Exits non-zero on failure.
