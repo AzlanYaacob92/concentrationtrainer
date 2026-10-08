@@ -42,7 +42,7 @@
             <span class="choice-verb">Learn</span>
             <span class="choice-desc">Walk me through a conversion, one step at a time — the thinking first, then the numbers.</span>
           </button>
-          <button class="choice-card choice-card--soft" data-goto="check" type="button">
+          <button class="choice-card choice-card--plain" data-goto="check" type="button">
             <span class="choice-verb">Check My Answers</span>
             <span class="choice-desc">I have already worked it out. Convert it for me so I can compare.</span>
           </button>
@@ -74,7 +74,7 @@
         </div>
 
         <!-- Step 3: fields -->
-        <div class="fields-card wizard-card" id="learn-fields" hidden>
+        <div class="card fields-card wizard-card" id="learn-fields" hidden>
           <span class="prompt-step">Step 3</span>
           <p class="prompt-question" id="learn-fields-title">Fill in what you know</p>
           <div class="field-list" id="learn-field-list"></div>
@@ -123,7 +123,7 @@
     <section id="screen-check" class="screen">
       <button class="back-link" data-goto="landing" type="button">← Back to start</button>
 
-      <div class="converter-bar">
+      <div class="card converter-bar">
         <div class="converter-field">
           <label class="field-label" for="check-from">Convert from</label>
           <select id="check-from" class="select"><option value="">Choose a measure…</option></select>
@@ -135,7 +135,7 @@
         </div>
       </div>
 
-      <div class="fields-card" id="check-fields" hidden>
+      <div class="card fields-card" id="check-fields" hidden>
         <div class="field-list" id="check-field-list"></div>
         <p class="form-error" id="check-error" hidden></p>
         <div class="check-actions">
