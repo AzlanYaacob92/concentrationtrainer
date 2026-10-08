@@ -40,101 +40,21 @@
 (function () {
   const { MEASURES, MEASURE_ORDER, FIELDS, getConverter, fmt } = window.CHEM;
 
-  /* ---------------- reduced motion ---------------- */
-  let prefersReducedMotion = false;
-  try {
-    prefersReducedMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
-  } catch (e) { /* matchMedia unavailable — treat as full motion */ }
+  /* ---------------- motion ----------------
+     Every JS-driven animation goes through motion.js (window.Motion), which
+     takes its timing from the design-system tokens and honours reduced motion. */
+  const Motion = window.Motion;
 
-  /* ---------------- animation helpers ----------------
-     Every pan pairs a real CSS animation with a timed fallback, so
-     navigation never gets stuck — if the animation doesn't fire
-     (reduced motion, a hidden ancestor, a slow device), the
-     fallback timer moves things along anyway. */
-  function onAnimEnd(el, fallbackMs, cb) {
-    let done = false;
-    function finish() {
-      if (done) return;
-      done = true;
-      el.removeEventListener('animationend', onEnd);
-      clearTimeout(timer);
-      cb();
-    }
-    function onEnd(e) { if (e.target === el) finish(); }
-    el.addEventListener('animationend', onEnd);
-    const timer = setTimeout(finish, fallbackMs);
+  // The one wizard transition primitive: `fromEl` leaves (if any), `updateFn`
+  // runs, then `toEl` arrives. fromEl and toEl may be the same element,
+  // refreshed in place.
+  function panTransition(fromEl, toEl, direction, updateFn) {
+    Motion.swap(fromEl, toEl, updateFn);
   }
-
-  // Pan a card into view. direction 'forward' enters from the right
-  // (the normal progress direction); 'back' enters from the left.
-  function enterCard(el, direction) {
+  function enterCard(el) {
     if (!el) return;
     el.hidden = false;
-    if (prefersReducedMotion) return;
-    const cls = direction === 'back' ? 'anim-pan-in-left' : 'anim-pan-in-right';
-    el.classList.remove('anim-pan-in-left', 'anim-pan-in-right');
-    void el.offsetWidth; // force reflow so a repeated class name restarts the animation
-    el.classList.add(cls);
-    onAnimEnd(el, 700, () => el.classList.remove(cls));
-  }
-
-  // Pan a card out of view, then call back.
-  function exitCard(el, direction, cb) {
-    if (!el) { if (cb) cb(); return; }
-    if (prefersReducedMotion) { el.hidden = true; if (cb) cb(); return; }
-    const cls = direction === 'back' ? 'anim-pan-out-right' : 'anim-pan-out-left';
-    el.classList.remove('anim-pan-out-left', 'anim-pan-out-right');
-    void el.offsetWidth;
-    el.classList.add(cls);
-    onAnimEnd(el, 550, () => {
-      el.hidden = true;
-      el.classList.remove(cls);
-      if (cb) cb();
-    });
-  }
-
-  // The one wizard transition primitive used throughout: pan `fromEl`
-  // out (if there is one), run `updateFn` (e.g. fill in the next
-  // step's content — fromEl and toEl are often the same element,
-  // refreshed in place), then pan `toEl` in.
-  function panTransition(fromEl, toEl, direction, updateFn) {
-    function doEnter() {
-      if (updateFn) updateFn();
-      enterCard(toEl, direction);
-    }
-    if (fromEl) exitCard(fromEl, direction, doEnter);
-    else doEnter();
-  }
-
-  // Reveal an HTML string into `el` as if it were being typed —
-  // characters appear one at a time, but a whole <br> or a whole
-  // fraction (<span class="frac">…</span>) appears as one atomic
-  // unit instead of getting typed apart.
-  function typewriterReveal(el, html, speed) {
-    if (prefersReducedMotion) { el.innerHTML = html; return; }
-    speed = speed || 16;
-    const tokens = [];
-    let i = 0;
-    while (i < html.length) {
-      if (html.startsWith('<br>', i)) { tokens.push('<br>'); i += 4; continue; }
-      if (html.startsWith('<span class="frac">', i)) {
-        const closeAt = html.indexOf('</span></span>', i);
-        const end = closeAt === -1 ? html.length : closeAt + '</span></span>'.length;
-        tokens.push(html.slice(i, end));
-        i = end;
-        continue;
-      }
-      tokens.push(html[i]);
-      i += 1;
-    }
-    el.innerHTML = '';
-    let idx = 0;
-    (function step() {
-      if (idx >= tokens.length) return;
-      el.innerHTML += tokens[idx];
-      idx += 1;
-      setTimeout(step, speed);
-    })();
+    Motion.enter(el);
   }
 
   /* ---------------- screen navigation ---------------- */
@@ -145,45 +65,28 @@
   };
   const landingContent = document.getElementById('landing-content');
 
-  // The landing choices grow in one at a time; the headline pans in
-  // from the right. Runs on first load and every time we come back.
+  // The headline arrives, then the landing choices grow in one after another.
+  // Runs on first load and every time we come back.
   function playLandingEntrance() {
-    if (prefersReducedMotion) return;
-    const hero = landingContent.querySelector('.hero-lead');
-    const cards = landingContent.querySelectorAll('.choice-card');
-    hero.classList.remove('anim-hero-in');
-    void hero.offsetWidth;
-    hero.classList.add('anim-hero-in');
-    cards.forEach((card, i) => {
-      card.classList.remove('anim-grow-in');
-      card.style.animationDelay = `${0.45 + i * 0.18}s`;
-      void card.offsetWidth;
-      card.classList.add('anim-grow-in');
-    });
+    Motion.enter(landingContent.querySelector('.hero-lead'));
+    Motion.stagger(landingContent.querySelectorAll('.choice-card'), { y: 0, scale: 0.92, delay: 120 });
   }
 
   function switchScreen(name) {
     Object.values(screens).forEach(s => s.classList.remove('is-active'));
     screens[name].classList.add('is-active');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    Motion.scrollTop();
     if (name === 'learn') resetLearn();
     if (name === 'check') resetCheck();
     if (name === 'landing') playLandingEntrance();
   }
 
-  // Leaving the landing screen pans its whole content out to the
-  // left first; every other switch happens straight away (the
-  // target screen still fades in via .screen.is-active).
+  // Leaving the landing screen fades its content out first; every other
+  // switch happens straight away (the target screen still fades in via
+  // .screen.is-active).
   function goto(name) {
     if (screens.landing.classList.contains('is-active') && name !== 'landing') {
-      if (prefersReducedMotion) { switchScreen(name); return; }
-      landingContent.classList.remove('anim-landing-out');
-      void landingContent.offsetWidth;
-      landingContent.classList.add('anim-landing-out');
-      onAnimEnd(landingContent, 500, () => {
-        landingContent.classList.remove('anim-landing-out');
-        switchScreen(name);
-      });
+      Motion.exit(landingContent, { hide: false }).then(() => switchScreen(name));
     } else {
       switchScreen(name);
     }
@@ -393,30 +296,17 @@
   // gentle stagger (the calculation "reveal" for the Learn combo card).
   function revealMathGrid(el, html) {
     el.innerHTML = mathGrid(html);
-    if (prefersReducedMotion) return;
-    try {
-      const grid = el.querySelector('.eqgrid');
-      if (!grid) return;
-      const byRow = new Map();
-      Array.from(grid.children).forEach(c => {
-        const r = c.style.gridRow || '1';
-        if (!byRow.has(r)) byRow.set(r, []);
-        byRow.get(r).push(c);
-      });
-      let delay = 0;
-      byRow.forEach(rowCells => {
-        rowCells.forEach(c => {
-          c.style.opacity = '0';
-          c.style.transform = 'translateY(4px)';
-          c.style.transition = 'opacity .28s var(--ease), transform .28s var(--ease)';
-        });
-        setTimeout(() => rowCells.forEach(c => {
-          c.style.opacity = '1';
-          c.style.transform = 'none';
-        }), delay);
-        delay += 150;
-      });
-    } catch (e) { /* content already shown; animation is best-effort */ }
+    const grid = el.querySelector('.eqgrid');
+    if (!grid) return;
+    const byRow = new Map();
+    Array.from(grid.children).forEach(c => {
+      const r = c.style.gridRow || '1';
+      if (!byRow.has(r)) byRow.set(r, []);
+      byRow.get(r).push(c);
+    });
+    Array.from(byRow.values()).forEach((rowCells, i) => {
+      rowCells.forEach(c => Motion.enter(c, { y: 4, duration: 'base', delay: i * 150 }));
+    });
   }
 
   // Build the redesigned worksheet card: a deep-teal result header,
@@ -522,9 +412,8 @@
 
     learnWizardCards.forEach(el => {
       el.hidden = true;
-      el.classList.remove('anim-pan-in-left', 'anim-pan-in-right', 'anim-pan-out-left', 'anim-pan-out-right');
     });
-    enterCard(promptTarget, 'forward');
+    enterCard(promptTarget);
   }
 
   learnTargetSel.addEventListener('change', () => {
@@ -682,7 +571,7 @@
     checkRevealList.innerHTML = '';
     checkRevealList.appendChild(renderWorksheet(from, to, result));
     checkSolution.hidden = false;
-    checkSolution.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    Motion.scrollIntoView(checkSolution, 'start');
   });
 
   checkClearBtn.addEventListener('click', () => {

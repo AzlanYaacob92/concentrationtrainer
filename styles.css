@@ -33,7 +33,6 @@ main { display: block; }
 .wizard-back-row { margin-top: var(--sp-4); }
 
 /* ---------------- landing ---------------- */
-.landing-content.anim-landing-out { animation: pan-out-left var(--dur-slow) var(--ease) forwards; }
 
 .hero-lead {
   font: var(--t-display); letter-spacing: var(--tr-display);
