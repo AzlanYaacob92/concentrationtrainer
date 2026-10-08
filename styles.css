@@ -1,801 +1,362 @@
-/* =============================================================
-   styles.css  —  appearance only
-   Teal + amber house style, Georgia for display type.
-   ============================================================= */
-
-:root {
-  --teal-900: #134e4a;
-  --teal-950: #0a2e2b;
-  --teal-700: #0f766e;
-  --teal-600: #0d9488;
-  --teal-100: #cce9e5;
-  --teal-50:  #eefaf8;
-
-  --amber-600: #d97706;
-  --amber-500: #f59e0b;
-  --amber-100: #fdecc8;
-
-  --bg:    #faf7f1;
-  --card:  #ffffff;
-  --ink:   #23302f;
-  --muted: #6b7671;
-  --line:  #e8e1d4;
-
-  --calc-bg:      #f6f2ea;
-  --error-bg:     #fef2f2;
-  --error-border: #fecaca;
-  --error-text:   #b91c1c;
-  --answer-value: #7c3a06;
-
-  --amber-panel-bg:     var(--amber-100);
-  --amber-panel-border: var(--amber-500);
-  --amber-panel-text:   var(--answer-value);
-
-  --shadow: 0 1px 2px rgba(19, 78, 74, .06), 0 8px 24px rgba(19, 78, 74, .06);
-  --radius: 14px;
-
-  --display: Georgia, "Times New Roman", serif;
-  --body: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --mono: "SFMono-Regular", ui-monospace, Menlo, Consolas, monospace;
-
-  /* one easing curve, used everywhere, so every transition feels
-     like part of the same material — slow to start, glides to rest */
-  --ease-buttery: cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-/* ---------- dark mode ----------
-   Palette matched to the Limiting Reactant Trainer (stoichiometry
-   calculator): near-black navy surfaces, teal/cyan accent glow, gold
-   for warnings and highlights. Same variable names as light mode,
-   dark values, switched by a data-theme attribute on <html>.
-   The teal/amber brand hues stay the same family in both themes —
-   only the neutral surfaces (and the amber panels, which switch from
-   a bright cream card to a dark warm panel with gold text, matching
-   how the stoichiometry tool treats its highlight/warning blocks)
-   change for dark mode. */
-[data-theme="dark"] {
-  --bg:    #0b1015;
-  --card:  #131c24;
-  --ink:   #e8eef4;
-  --muted: #8a9aa8;
-  --line:  #243240;
-
-  --calc-bg:      #172230;
-  --error-bg:     #2a1414;
-  --error-border: #5a2a2a;
-  --error-text:   #f4b4b4;
-
-  --amber-panel-bg:     #2a230f;
-  --amber-panel-border: #6b4a12;
-  --amber-panel-text:   #f0c473;
-
-  /* Brand accents remapped to the stoichiometry palette: bright cyan
-     for teal, gold for amber. Same variable names as light mode, new
-     hues — downstream rules (eyebrows, focus rings, borders, primary
-     button) pick up the accent shift automatically without needing
-     dozens of individual overrides.
-        --teal-50, --teal-900, --teal-950 are NOT remapped: they're
-     also used as LIGHT TEXT inside dark teal cards (the strategy
-     zone, the worksheet header, the Learn answer callout), which
-     stay dark in both modes. The few places those tokens were used
-     as light backgrounds or dark ink are pinned separately below. */
-  --teal-600: #2dd4bf;
-  --teal-700: #2dd4bf;
-  --teal-100: #2a6b63;
-
-  --amber-500: #f5b942;
-  --amber-600: #f5b942;
-  --amber-100: #3a3220;
-
-  --shadow: 0 18px 40px -20px rgba(0, 0, 0, .85);
-}
-
-/* ---------- dark-mode specific overrides ----------
-   Rules where a brand token was doing double duty — e.g. --teal-900
-   is a dark surface for the strategy zone AND was the dark ink colour
-   for the site title. Remapping the token would break one of the two,
-   so those usages are pinned to the right theme-aware token here.  */
-[data-theme="dark"] .site-title,
-[data-theme="dark"] .choice-verb,
-[data-theme="dark"] .solution-heading,
-[data-theme="dark"] .worksheet-step-title,
-[data-theme="dark"] .worksheet-oneline-formula { color: var(--ink); }
-
-[data-theme="dark"] .back-link:hover { color: #7af2e4; }
-
-/* Ghost-button hover was a very light teal wash; in dark mode make it
-   the deep accent-soft the stoichiometry tool uses for pressed states. */
-[data-theme="dark"] .btn--ghost:hover { background: #0f3b37; }
-
-/* Primary CTA becomes bright cyan bg — flip its text to dark so it's
-   readable, and give it a slightly brighter cyan on hover (like the
-   stoichiometry .cell.sel highlight) instead of the light-mode
-   darker-teal hover, which would dim a bright button. */
-[data-theme="dark"] .btn--primary { color: #06231f; }
-[data-theme="dark"] .btn--primary:hover { background: #7af2e4; box-shadow: 0 6px 16px rgba(45, 212, 191, .35); }
-
-[data-theme="dark"] .choice-card { box-shadow: var(--shadow), 0 0 18px rgba(45, 212, 191, .28); }
-[data-theme="dark"] .choice-card:hover { box-shadow: 0 10px 30px rgba(19, 78, 74, .12), 0 0 32px rgba(45, 212, 191, .55); }
-[data-theme="dark"] .choice-card--amber { box-shadow: var(--shadow), 0 0 18px rgba(245, 185, 66, .28); }
-[data-theme="dark"] .choice-card--amber:hover { box-shadow: 0 10px 30px rgba(19, 78, 74, .12), 0 0 32px rgba(245, 185, 66, .55); }
+/* styles.css — Chemculate Concentration
+ * Maps components onto the Lavender + Willow tokens in design-system.css
+ * (linked first). No palette lives here. Lavender = primary / interactive,
+ * willow = the final answer. One saturated element per view. */
 
 * { box-sizing: border-box; }
 
+html { color-scheme: light; }
+html[data-theme="dark"] { color-scheme: dark; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { color-scheme: dark; } }
+
+/* Text-on-surface roles that need a lighter step in dark mode. Declared once as
+   local tokens so no component repeats the dark/OS-dark selector pair. */
+:root {
+  --link: var(--primary-soft-ink);
+  --heading-1: var(--lav-700);
+  --on-soft-accent: var(--accent-soft-ink);
+}
+[data-theme="dark"] {
+  --link: var(--primary);
+  --heading-1: var(--ink);
+  --on-soft-accent: var(--accent);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --link: var(--primary);
+    --heading-1: var(--ink);
+    --on-soft-accent: var(--accent);
+  }
+}
+
 body {
   margin: 0;
-  font-family: var(--body);
+  font: var(--t-body);
   color: var(--ink);
   background: var(--bg);
-  line-height: 1.55;
   -webkit-font-smoothing: antialiased;
-  transition: background .35s var(--ease-buttery), color .35s var(--ease-buttery);
-}
-[data-theme="dark"] body {
-  background:
-    radial-gradient(1200px 600px at 80% -10%, #14202b 0%, transparent 60%),
-    radial-gradient(900px 500px at -10% 10%, #102219 0%, transparent 55%),
-    var(--bg);
+  transition: background var(--dur) var(--ease), color var(--dur) var(--ease);
 }
 
-/* ---------- header / footer ---------- */
-.site-header {
-  max-width: 760px;
-  margin: 0 auto;
-  padding: 40px 24px 8px;
-}
+:focus-visible { outline: none; box-shadow: var(--focus-ring); border-radius: var(--r-sm); }
+
+/* ---------------- theme toggle ---------------- */
 .theme-toggle {
-  position: fixed;
-  top: 18px;
-  right: 18px;
-  z-index: 50;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  border: 1px solid var(--line);
-  background: var(--card);
-  color: var(--ink);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.15rem;
-  line-height: 1;
-  cursor: pointer;
-  box-shadow: var(--shadow);
-  transition: background .35s var(--ease-buttery), transform .2s var(--ease-buttery), box-shadow .3s var(--ease-buttery);
+  position: fixed; top: var(--sp-4); right: var(--sp-4); z-index: 50;
+  width: 44px; height: 44px; border-radius: 50%;
+  border: 1px solid var(--line-strong);
+  background: var(--card); color: var(--ink);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.15rem; line-height: 1; cursor: pointer;
+  box-shadow: var(--shadow-1);
+  transition: background var(--dur) var(--ease), transform var(--dur-fast) var(--ease), box-shadow var(--dur) var(--ease);
 }
-.theme-toggle:hover { transform: translateY(-2px); }
-.theme-toggle:focus-visible { outline: 3px solid var(--amber-500); outline-offset: 2px; }
-@media (max-width: 480px) {
-  .site-header { padding-right: 64px; }
+.theme-toggle:hover { background: var(--primary-soft); transform: translateY(-1px); }
+.theme-toggle:focus-visible { box-shadow: var(--focus-ring); border-radius: 50%; }
+
+/* ---------------- frame ---------------- */
+.page { max-width: 760px; margin: 0 auto; padding: var(--sp-5) var(--sp-4) var(--sp-8); }
+
+.top-links { display: flex; flex-wrap: wrap; gap: var(--sp-1) var(--sp-5); margin-bottom: var(--sp-5); }
+@media (max-width: 1040px) { .top-links { padding-right: 60px; } }
+.home-link {
+  display: inline-block; color: var(--link); text-decoration: none;
+  font: var(--t-body-strong);
 }
+.home-link:hover { text-decoration: underline; }
+
+.page-header { margin-bottom: var(--sp-5); }
 .eyebrow {
-  display: inline-block;
-  font-size: .74rem;
-  letter-spacing: .14em;
-  text-transform: uppercase;
-  color: var(--teal-700);
-  font-weight: 600;
-}
-.site-title {
-  font-family: var(--display);
-  font-size: clamp(2rem, 6vw, 2.9rem);
-  margin: 6px 0 0;
-  color: var(--teal-900);
-  letter-spacing: -.01em;
-}
-.site-footer {
-  max-width: 760px;
-  margin: 56px auto 40px;
-  padding: 0 24px;
+  display: inline-block; margin: 0; max-width: none;
+  font: var(--t-label); text-transform: uppercase; letter-spacing: var(--tr-label);
   color: var(--muted);
-  font-size: .82rem;
-  border-top: 1px solid var(--line);
-  padding-top: 18px;
 }
+h1 { margin: var(--sp-1) 0 var(--sp-3); color: var(--heading-1); }
+h2 { margin: 0 0 var(--sp-3); }
+main { display: block; }
 
-main { max-width: 760px; margin: 0 auto; padding: 8px 24px 0; }
+.page-footer {
+  text-align: center; margin-top: var(--sp-7); padding-top: var(--sp-4);
+  border-top: 1px solid var(--line);
+}
+.page-footer p { margin: 0 auto; font: var(--t-small); color: var(--muted); }
 
-/* ---------- screen switching ---------- */
+/* ---------------- screens + motion ---------------- */
 .screen { display: none; }
-.screen.is-active { display: block; animation: fade .65s var(--ease-buttery); }
+.screen.is-active { display: block; animation: fade var(--dur-slow) var(--ease); }
 @keyframes fade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
-
-/* ---------- wizard pan transitions (Learn branch) ----------
-   One card visible at a time. "forward" exits left / enters from
-   the right (the normal progress direction); "back" reverses it. */
 @keyframes pan-in-right  { from { opacity: 0; transform: translateX(56px); } to { opacity: 1; transform: none; } }
 @keyframes pan-in-left   { from { opacity: 0; transform: translateX(-56px); } to { opacity: 1; transform: none; } }
 @keyframes pan-out-left  { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateX(-56px); } }
 @keyframes pan-out-right { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateX(56px); } }
+@keyframes grow-in { from { opacity: 0; transform: scale(0.6); } to { opacity: 1; transform: scale(1); } }
 
 .wizard-card { will-change: transform, opacity; }
-.anim-pan-in-right  { animation: pan-in-right .65s var(--ease-buttery); }
-.anim-pan-in-left   { animation: pan-in-left .65s var(--ease-buttery); }
-.anim-pan-out-left  { animation: pan-out-left .5s var(--ease-buttery) forwards; }
-.anim-pan-out-right { animation: pan-out-right .5s var(--ease-buttery) forwards; }
+.anim-pan-in-right  { animation: pan-in-right var(--dur-slow) var(--ease); }
+.anim-pan-in-left   { animation: pan-in-left var(--dur-slow) var(--ease); }
+.anim-pan-out-left  { animation: pan-out-left var(--dur-slow) var(--ease) forwards; }
+.anim-pan-out-right { animation: pan-out-right var(--dur-slow) var(--ease) forwards; }
+.wizard-back-row { margin-top: var(--sp-4); }
 
-.wizard-back-row { margin-top: 18px; }
-.wizard-back { padding: 8px 16px; font-size: .9rem; }
+/* ---------------- landing ---------------- */
+.hero-lead.anim-hero-in { animation: pan-in-right var(--dur-slow) var(--ease) both; }
+.choice-card.anim-grow-in { animation: grow-in var(--dur-slow) var(--ease) backwards; }
+.landing-content.anim-landing-out { animation: pan-out-left var(--dur-slow) var(--ease) forwards; }
 
-/* ---------- landing entrance ---------- */
-.hero-lead.anim-hero-in { animation: pan-in-right .7s var(--ease-buttery) both; }
-
-.choice-card.anim-grow-in { animation: grow-in .55s var(--ease-buttery) both; }
-@keyframes grow-in { from { opacity: 0; transform: scale(.35); } to { opacity: 1; transform: scale(1); } }
-
-.landing-content.anim-landing-out { animation: pan-out-left .5s var(--ease-buttery) forwards; }
-
-/* ---------- landing ---------- */
 .hero-lead {
-  font-family: var(--display);
-  font-size: clamp(1.8rem, 5.5vw, 2.6rem);
-  color: var(--ink);
-  margin: 28px 0 24px;
-  font-style: italic;
+  font: var(--t-display); letter-spacing: var(--tr-display);
+  color: var(--ink-2); margin: var(--sp-5) 0; max-width: none;
 }
-.choice-grid { display: grid; gap: 16px; grid-template-columns: 1fr 1fr; }
+.choice-grid {
+  display: grid; gap: var(--sp-5); grid-template-columns: 1fr 1fr;
+  padding: var(--sp-2) 0 var(--sp-3);
+}
 @media (max-width: 560px) { .choice-grid { grid-template-columns: 1fr; } }
 
+/* choice cards: Learn is the one saturated element; Check is soft */
 .choice-card {
-  text-align: left;
-  cursor: pointer;
-  border: 1px solid var(--teal-100);
-  background: var(--card);
-  border-radius: var(--radius);
-  padding: 24px 22px;
-  box-shadow: var(--shadow);
-  display: flex; flex-direction: column; gap: 10px;
-  transition: transform .3s var(--ease-buttery), box-shadow .3s var(--ease-buttery), border-color .3s var(--ease-buttery);
-  border-left: 5px solid var(--teal-600);
+  appearance: none; text-align: left;
+  display: flex; flex-direction: column; gap: var(--sp-3);
+  padding: var(--sp-5); border: 1px solid transparent;
+  border-radius: var(--r-lg);
+  background: var(--primary); color: var(--primary-ink);
+  font: inherit; cursor: pointer;
+  box-shadow: var(--shadow-2);
+  -webkit-tap-highlight-color: transparent;
+  transition: background var(--dur) var(--ease), transform var(--dur) var(--ease),
+              box-shadow var(--dur) var(--ease), border-color var(--dur) var(--ease);
 }
-.choice-card--amber { border-left-color: var(--amber-500); border-color: var(--amber-100); }
-.choice-card:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(19,78,74,.12); }
-.choice-card:active { transform: translateY(-1px) scale(.99); transition-duration: .12s; }
-.choice-verb {
-  font-family: var(--display);
-  font-size: 1.5rem;
-  color: var(--teal-900);
+.choice-card--soft {
+  background: var(--primary-soft); color: var(--primary-soft-ink);
+  border-color: var(--line-strong);
 }
-.choice-card--amber .choice-verb { color: var(--amber-600); }
-.choice-desc { color: var(--muted); font-size: .95rem; font-family: var(--display); }
+.choice-card:focus-visible { box-shadow: var(--focus-ring), var(--shadow-2); border-radius: var(--r-lg); }
+@media (hover: hover) {
+  .choice-card:hover { background: var(--primary-hover); transform: translateY(-3px); box-shadow: var(--shadow-3); }
+  .choice-card--soft:hover { background: var(--bg-tint); border-color: var(--primary); }
+}
+.choice-card:active { transform: translateY(1px); }
+.choice-verb { font: var(--t-h2); letter-spacing: var(--tr-heading); color: inherit; }
+.choice-desc { font: var(--t-body); color: inherit; }
 
-/* ---------- back link ---------- */
-.back-link,
-.back-link:link,
-.back-link:visited {
+/* ---------------- back link ---------------- */
+.back-link, .back-link:link, .back-link:visited {
   background: none; border: none; cursor: pointer;
-  color: var(--teal-700); font-size: .9rem; font-weight: 600;
-  padding: 6px 0; margin: 12px 0 20px;
+  color: var(--link); font: var(--t-body-strong);
+  padding: var(--sp-2) 0; margin: var(--sp-1) 0 var(--sp-4);
   text-decoration: none; display: inline-block;
-  transition: color .2s var(--ease-buttery), transform .2s var(--ease-buttery);
 }
-.back-link:hover { text-decoration: underline; color: var(--teal-900); transform: translateX(-2px); }
+.back-link:hover { text-decoration: underline; }
 
-/* ---------- prompt / fields cards ---------- */
-.prompt-card, .fields-card {
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 22px;
-  box-shadow: var(--shadow);
-  margin-bottom: 16px;
-  font-family: var(--display);
-  animation: fade .65s var(--ease-buttery);
+/* ---------------- panels ---------------- */
+.prompt-card, .fields-card, .converter-bar {
+  background: var(--card); border: 1px solid var(--line);
+  border-radius: var(--r-lg); padding: var(--sp-5);
+  box-shadow: var(--shadow-2); margin-bottom: var(--sp-5);
 }
+.prompt-card, .fields-card { animation: fade var(--dur-slow) var(--ease); }
 .prompt-step {
-  display: inline-block;
-  font-family: var(--body);
-  font-size: .7rem; letter-spacing: .12em; text-transform: uppercase;
-  color: var(--teal-700); font-weight: 700; margin-bottom: 10px;
+  display: inline-block; margin-bottom: var(--sp-2);
+  font: var(--t-label); text-transform: uppercase; letter-spacing: var(--tr-label);
+  color: var(--link);
 }
-.prompt-question {
-  display: block;
-  font-family: var(--display);
-  font-size: 1.25rem;
-  color: var(--ink);
-  margin: 0 0 14px;
-}
-.conversion-pair {
-  display: block;
-  margin-top: 8px;
-  font-weight: 700;
-  color: var(--teal-700);
-}
+.prompt-question { display: block; font: var(--t-h2); color: var(--ink-2); margin: 0 0 var(--sp-4); max-width: none; }
+.conversion-pair { display: block; margin-top: var(--sp-2); font-weight: var(--w-semi); color: var(--link); }
 
-/* ---------- form controls ---------- */
+/* ---------------- form controls ---------------- */
 .select, .num-input {
-  width: 100%;
-  font-family: var(--body);
-  font-size: 1rem;
-  color: var(--ink);
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  padding: 11px 13px;
-  transition: border-color .2s var(--ease-buttery), outline-color .2s var(--ease-buttery), box-shadow .2s var(--ease-buttery);
+  width: 100%; font: var(--t-body); color: var(--ink);
+  background: var(--card); border: 1px solid var(--line-strong);
+  border-radius: var(--r-md); padding: 10px 14px;
+  transition: border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
 }
-.select:focus, .num-input:focus {
-  outline: 3px solid var(--teal-100);
-  border-color: var(--teal-600);
-}
+.num-input { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.select:hover, .num-input:hover { border-color: var(--primary); }
+.select:focus, .num-input:focus { outline: none; border-color: var(--primary); box-shadow: var(--focus-ring); border-radius: var(--r-md); }
+.num-input::placeholder { color: var(--faint); }
 
-.field-list { display: flex; flex-direction: column; gap: 14px; }
-.field-row { display: flex; flex-direction: column; gap: 6px; }
-.field-label { font-size: .9rem; font-weight: 600; color: var(--ink); font-family: var(--display); }
-.field-unit { color: var(--muted); font-weight: 400; }
+.field-list { display: flex; flex-direction: column; gap: var(--sp-4); }
+.field-row { display: flex; flex-direction: column; gap: var(--sp-2); }
+.field-label { font: var(--t-body-strong); color: var(--ink); }
+.field-unit { color: var(--muted); font-weight: var(--w-normal); }
 .input-wrap { position: relative; }
 
-.fields-card .prompt-question { margin-bottom: 16px; }
-
-/* ---------- buttons ---------- */
+/* ---------------- buttons ---------------- */
 .btn {
-  font-family: var(--body);
-  font-size: .98rem;
-  font-weight: 600;
-  border-radius: 10px;
-  padding: 11px 20px;
+  font: var(--t-body); font-weight: var(--w-semi);
+  display: inline-flex; align-items: center; gap: var(--sp-2);
+  padding: 10px 22px; border-radius: var(--r-pill);
+  border: 1px solid var(--line-strong);
+  background: transparent; color: var(--link);
   cursor: pointer;
-  border: 1px solid transparent;
-  transition: background .25s var(--ease-buttery), transform .2s var(--ease-buttery), box-shadow .25s var(--ease-buttery);
+  transition: background var(--dur) var(--ease), transform var(--dur) var(--ease),
+              box-shadow var(--dur) var(--ease), color var(--dur) var(--ease);
 }
-.btn:active { transform: translateY(1px) scale(.98); transition-duration: .1s; }
-.btn--primary { background: var(--teal-700); color: #fff; }
-.btn--primary:hover { background: var(--teal-900); transform: translateY(-1px); box-shadow: 0 6px 16px rgba(19,78,74,.18); }
-.btn--ghost { background: transparent; color: var(--teal-700); border-color: var(--teal-100); }
-.btn--ghost:hover { background: var(--teal-50); transform: translateY(-1px); }
-.btn:focus-visible { outline: 3px solid var(--amber-500); outline-offset: 2px; }
+.btn:hover { background: var(--bg-tint); }
+.btn:focus-visible { box-shadow: var(--focus-ring); border-radius: var(--r-pill); }
+.btn:active { transform: translateY(1px); }
+.btn--primary { background: var(--primary); border-color: transparent; color: var(--primary-ink); }
+.btn--primary:hover { background: var(--primary-hover); }
+.wizard-back { padding: 8px 18px; }
 
-#learn-start, #learn-reveal-next { margin-top: 18px; }
-.reveal-controls { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 18px; }
-.check-actions { display: flex; gap: 12px; margin-top: 18px; flex-wrap: wrap; }
+#learn-start, #learn-reveal-next { margin-top: var(--sp-4); }
+.check-actions { display: flex; gap: var(--sp-3); margin-top: var(--sp-4); flex-wrap: wrap; }
 
 .form-error {
-  color: var(--error-text); font-size: .9rem; margin: 14px 0 0;
-  background: var(--error-bg); border: 1px solid var(--error-border); border-radius: 8px; padding: 10px 12px;
+  color: var(--danger); background: var(--danger-soft);
+  border-left: 3px solid var(--danger); border-radius: 0 var(--r-md) var(--r-md) 0;
+  font: var(--t-body); margin: var(--sp-4) 0 0; padding: var(--sp-3) var(--sp-4);
+  max-width: none;
 }
 
-/* ---------- converter bar (check mode) ---------- */
-.converter-bar {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: end;
-  gap: 14px;
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 20px;
-  box-shadow: var(--shadow);
-  margin-bottom: 16px;
-}
-.converter-arrow { font-size: 1.4rem; color: var(--teal-600); padding-bottom: 8px; }
+/* ---------------- converter bar ---------------- */
+.converter-bar { display: grid; grid-template-columns: 1fr auto 1fr; align-items: end; gap: var(--sp-4); }
+.converter-arrow { font-size: 1.4rem; color: var(--link); padding-bottom: var(--sp-2); }
 @media (max-width: 560px) {
   .converter-bar { grid-template-columns: 1fr; }
   .converter-arrow { display: none; }
 }
 
-/* ---------- stacked fractions in the calculation working ---------- */
+/* ---------------- stacked fractions ---------------- */
 .frac {
-  display: inline-flex;
-  flex-direction: column;
-  align-items: stretch;
-  justify-content: center;
-  text-align: center;
-  vertical-align: middle;
-  margin: 0 6px;
-  line-height: 1.3;
-  font-size: .92em;
-  position: relative;
-  top: -.05em;
+  display: inline-flex; flex-direction: column; align-items: stretch; justify-content: center;
+  text-align: center; vertical-align: middle; margin: 0 6px;
+  line-height: 1.3; font-size: 0.92em; position: relative; top: -0.05em;
 }
 .frac-num { padding: 0 5px 2px; border-bottom: 1.4px solid currentColor; }
 .frac-den { padding: 2px 5px 0; }
 
-/* stacked-equation grid: every '=' aligns in its own column, each
-   <br>-separated equation is a row (built by mathGrid() in app.js) */
-.eqgrid {
-  display: inline-grid;
-  align-items: center;
-  row-gap: 5px;
-  column-gap: 0;
-  max-width: 100%;
-}
+.eqgrid { display: inline-grid; align-items: center; row-gap: 5px; column-gap: 0; max-width: 100%; }
 .eqgrid .eq-seg { white-space: nowrap; }
-.eqgrid .eq-op { padding: 0 .6em; }
+.eqgrid .eq-op { padding: 0 0.6em; }
 .eqgrid .eq-lhs { justify-self: end; }
-.eqgrid .eq-rhs,
-.eqgrid .eq-solo { justify-self: start; }
+.eqgrid .eq-rhs, .eqgrid .eq-solo { justify-self: start; }
 
-/* ---------- solution / reveal cards (the signature) ---------- */
-.solution {
-  margin-top: 8px;
-  font-family: var(--display);
-  animation: fade .65s var(--ease-buttery);
+/* ---------------- solution / reveal ---------------- */
+.solution { margin-top: var(--sp-2); animation: fade var(--dur-slow) var(--ease); }
+.solution-heading { margin: var(--sp-2) 0 var(--sp-4); }
+.reveal-list { display: flex; flex-direction: column; gap: var(--sp-4); }
+.step-block { animation: fade var(--dur-slow) var(--ease); }
+
+.strategy-eyebrow, .math-eyebrow, .answer-eyebrow, .full-working-answer-label, .worksheet-eyebrow, .worksheet-section {
+  display: block; font: var(--t-label); text-transform: uppercase; letter-spacing: var(--tr-label);
+  color: var(--muted); margin-bottom: var(--sp-2);
 }
-.solution-heading {
-  font-family: var(--display);
-  font-size: 1.4rem;
-  color: var(--teal-900);
-  margin: 8px 0 16px;
-}
-.reveal-list { display: flex; flex-direction: column; gap: 14px; }
+.strategy-instruction { margin: 0 0 var(--sp-2); font: var(--t-h3); color: var(--ink-2); max-width: none; }
+.strategy-text { margin: 0; color: var(--ink); max-width: none; }
 
-.step-block { animation: fade .75s var(--ease-buttery); }
-
-/* Strategy card: the justification, revealed first. Leads with a
-   short instruction (the move being made), then the reasoning for
-   this specific conversion. */
 .strategy-card {
-  background: var(--teal-50);
-  border: 1px solid var(--teal-100);
-  border-left: 4px solid var(--teal-600);
-  border-radius: 12px;
-  padding: 16px 18px;
+  background: var(--primary-soft); border-left: 3px solid var(--primary);
+  border-radius: 0 var(--r-md) var(--r-md) 0; padding: var(--sp-4);
 }
-.strategy-eyebrow {
-  font-family: var(--body);
-  font-size: .68rem; letter-spacing: .12em; text-transform: uppercase;
-  color: var(--teal-700); font-weight: 700; display: block; margin-bottom: 6px;
-}
-.strategy-instruction {
-  margin: 0 0 6px;
-  font-family: var(--display);
-  font-size: 1.05rem;
-  color: var(--teal-900);
-}
-.strategy-text { margin: 0; color: var(--ink); font-family: var(--display); }
-
-/* Calculation card: teal's amber counterpart — same light, cream-ish
-   family as the rest of the page, not the old dark navy block. Georgia
-   throughout, including the working itself, per house style — the
-   .frac stacked-fraction markup reads cleanly in it. */
 .math-card {
-  background: var(--amber-panel-bg);
-  color: var(--ink);
-  border: 1px solid rgba(217, 119, 6, .22);
-  border-left: 4px solid var(--amber-600);
-  border-radius: 12px;
-  padding: 16px 18px;
-  margin-top: 10px;
-  font-family: var(--display);
-  font-size: 1.05rem;
-  line-height: 2;
-  overflow-x: auto;
-  animation: fade .75s var(--ease-buttery);
-}
-.math-eyebrow {
-  font-size: .68rem; letter-spacing: .12em; text-transform: uppercase;
-  color: var(--amber-600); font-weight: 700; display: block; margin-bottom: 8px;
-  font-family: var(--body);
+  background: var(--card); color: var(--ink); border: 1px solid var(--line);
+  border-radius: var(--r-md); padding: var(--sp-4); margin-top: var(--sp-3);
+  font: var(--t-quantity); line-height: 2; overflow-x: auto;
+  box-shadow: var(--shadow-1); animation: fade var(--dur-slow) var(--ease);
 }
 
-/* the final answer callout */
+/* final answer: willow is the answer. Solid fill = the view's one saturated element */
 .answer-callout {
-  background: var(--amber-panel-bg);
-  border: 1px solid var(--amber-panel-border);
-  border-left: 6px solid var(--amber-600);
-  border-radius: 12px;
-  padding: 20px 22px;
-  margin-top: 4px;
-  animation: fade .85s var(--ease-buttery);
+  background: var(--accent); color: var(--accent-ink);
+  border-radius: var(--r-lg); padding: var(--sp-5); margin-top: var(--sp-1);
+  box-shadow: var(--shadow-2); animation: fade var(--dur-slow) var(--ease);
 }
-.answer-eyebrow {
-  font-family: var(--body);
-  font-size: .7rem; letter-spacing: .12em; text-transform: uppercase;
-  color: var(--amber-600); font-weight: 700; display: block; margin-bottom: 6px;
-}
+.answer-callout .answer-eyebrow { color: var(--accent-ink); }
 .answer-value {
-  font-family: var(--display);
-  font-size: 1.6rem;
-  color: var(--amber-panel-text);
-  margin: 0;
+  font: var(--t-h2); font-family: var(--font-mono); font-variant-numeric: tabular-nums;
+  color: var(--accent-ink); margin: 0; max-width: none;
 }
+.answer-callout--learn { padding: var(--sp-6) var(--sp-5); }
+.answer-callout--learn .answer-value { font-size: 2rem; line-height: 1.25; margin-bottom: var(--sp-5); }
+.answer-callout .btn--ghost { color: var(--accent-ink); border-color: var(--accent-ink); }
+.answer-callout .btn--ghost:hover { background: var(--accent-hover); color: var(--accent-ink); }
+[data-theme="dark"] .answer-callout .btn--ghost:hover { background: var(--grn-200); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .answer-callout .btn--ghost:hover { background: var(--grn-200); } }
+.answer-callout .btn--ghost:focus-visible { box-shadow: 0 0 0 3px var(--accent-ink); }
 
-.fineprint { color: var(--muted); font-size: .8rem; margin-top: 20px; font-family: var(--body); }
+.fineprint { color: var(--muted); font: var(--t-small); margin-top: var(--sp-5); max-width: none; }
 
 /* ============================================================
-   LEARN BRANCH — combined strategy + calculation card
-   One rounded card, two zones: strategy in deep teal (dark, with
-   light text), calculation in white. Bigger type and padding than
-   the Check-mode cards, since this is the primary teaching surface.
+   LEARN: strategy (soft lavender) + calculation (card)
    ============================================================ */
 .step-combo {
-  border-radius: 20px;
-  overflow: hidden;
-  box-shadow: 0 14px 40px rgba(19, 78, 74, .18);
-  margin-bottom: 16px;
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--r-lg);
+  overflow: hidden; box-shadow: var(--shadow-2); margin-bottom: var(--sp-5);
 }
-.step-strategy-zone {
-  background: var(--teal-900);
-  color: var(--teal-50);
-  padding: 30px 28px 26px;
-}
-.step-strategy-zone .strategy-eyebrow {
-  font-family: var(--body);
-  font-size: .72rem; letter-spacing: .13em; text-transform: uppercase;
-  color: rgba(238, 250, 248, .72); font-weight: 700; display: block; margin-bottom: 10px;
-}
-.step-strategy-zone .strategy-instruction {
-  font-family: var(--display);
-  font-size: 1.3rem;
-  color: #fff;
-  margin: 0 0 8px;
-}
-.step-strategy-zone .strategy-text {
-  font-family: var(--display);
-  font-size: 1.1rem;
-  color: var(--teal-50);
-  opacity: .92;
-  margin: 0;
-}
+.step-strategy-zone { background: var(--primary-soft); padding: var(--sp-5); border-bottom: 1px solid var(--line); }
+.step-strategy-zone .strategy-instruction { font: var(--t-h2); color: var(--ink-2); margin: 0 0 var(--sp-2); }
+.step-strategy-zone .strategy-text { font: var(--t-body); color: var(--ink); margin: 0; }
 .step-strategy-zone .strategy-footnote {
-  font-family: var(--body);
-  font-size: .82rem;
-  color: rgba(238, 250, 248, .68);
-  margin: 12px 0 0;
-  padding-top: 10px;
-  border-top: 1px solid rgba(238, 250, 248, .16);
+  font: var(--t-small); color: var(--muted); max-width: none;
+  margin: var(--sp-3) 0 0; padding-top: var(--sp-3); border-top: 1px solid var(--line-strong);
 }
-.step-strategy-zone .strategy-footnote::before {
-  content: "Note — ";
-  font-weight: 700;
-  color: rgba(238, 250, 248, .82);
-}
-.step-calc-zone {
-  background: var(--calc-bg);
-  color: var(--ink);
-  padding: 28px;
-  font-family: var(--display);
-  font-size: 1.2rem;
-  line-height: 2.1;
-  min-height: 56px;
-}
-.step-calc-zone .math-eyebrow {
-  font-family: var(--body);
-  font-size: .72rem; letter-spacing: .13em; text-transform: uppercase;
-  color: var(--teal-700); font-weight: 700; display: block; margin-bottom: 10px;
-}
+.step-strategy-zone .strategy-footnote::before { content: "Note \2014  "; font-weight: var(--w-semi); }
+.step-calc-zone { background: var(--card); color: var(--ink); padding: var(--sp-5); min-height: 56px; }
 .math-typed {
-  margin: 0;
-  font-family: var(--mono);
-  font-size: 1.02rem;
-  line-height: 2.05;
-  letter-spacing: -.01em;
-  overflow-x: auto;
+  margin: 0; max-width: none; font: var(--t-quantity); font-size: 1.0625rem;
+  font-variant-numeric: tabular-nums; line-height: 2.05; overflow-x: auto;
 }
-.step-combo-actions { background: var(--calc-bg); padding: 0 28px 28px; }
-.step-combo-actions .btn { font-size: 1.02rem; padding: 13px 24px; }
+.step-combo-actions { background: var(--card); padding: 0 var(--sp-5) var(--sp-5); }
 
-/* ---------- final answer: bigger, deeper teal ---------- */
-.answer-callout--learn {
-  background: var(--teal-950);
-  border: none;
-  border-left: none;
-  border-radius: 20px;
-  padding: 38px 34px;
-  color: #fff;
-  box-shadow: 0 16px 44px rgba(10, 46, 43, .4);
-}
-.answer-callout--learn .answer-eyebrow { color: rgba(238, 250, 248, .72); font-family: var(--body); }
-.answer-callout--learn .answer-value {
-  color: #fff;
-  font-size: 2.1rem;
-  font-family: var(--display);
-  margin-bottom: 20px;
-}
-.answer-callout--learn .btn--ghost { color: #fff; border-color: rgba(255, 255, 255, .35); }
-.answer-callout--learn .btn--ghost:hover { background: rgba(255, 255, 255, .14); transform: translateY(-1px); }
-
-/* ---------- pure working summary (calculation only, no strategy) ---------- */
 .full-working-item {
-  background: var(--calc-bg);
-  border-radius: 14px;
-  padding: 22px 24px;
-  font-family: var(--mono);
-  font-size: 1rem;
-  line-height: 2.05;
-  letter-spacing: -.01em;
-  box-shadow: var(--shadow);
-  color: var(--ink);
-  overflow-x: auto;
+  background: var(--card-2); border: 1px solid var(--line); border-radius: var(--r-md);
+  padding: var(--sp-4) var(--sp-5); font: var(--t-quantity); line-height: 2.05;
+  font-variant-numeric: tabular-nums; color: var(--ink); overflow-x: auto;
 }
-.full-working-answer-label {
-  display: block;
-  font-family: var(--body);
-  font-size: .72rem; letter-spacing: .13em; text-transform: uppercase;
-  color: var(--teal-700); font-weight: 700; margin-bottom: 8px;
-}
-#learn-full-working #learn-restart { margin-top: 4px; }
-
+.full-working-answer-label { color: var(--on-soft-accent); }
+#learn-full-working #learn-restart { margin-top: var(--sp-1); }
 
 /* ============================================================
-   CHECK BRANCH — step-by-step worksheet card
-   Deep-teal result header, cream body with amber-numbered steps,
-   and a compact one-line formula in the footer. This is the
-   original "worked solution" look, restored for Check mode.
+   CHECK: worksheet (willow-soft result header, card body)
    ============================================================ */
 .worksheet {
-  width: 100%;
-  border-radius: 18px;
-  overflow: hidden;
-  box-shadow: 0 14px 40px rgba(19, 78, 74, .16);
-  background: var(--calc-bg);
-  border: 1px solid var(--line);
-  animation: fade .7s var(--ease-buttery);
+  width: 100%; border-radius: var(--r-lg); overflow: hidden; box-shadow: var(--shadow-2);
+  background: var(--card); border: 1px solid var(--line); animation: fade var(--dur-slow) var(--ease);
 }
-
-/* result header */
-.worksheet-header {
-  background: var(--teal-900);
-  padding: 22px 30px 20px;
-}
-.worksheet-eyebrow {
-  display: block;
-  font-family: var(--body);
-  font-size: .72rem;
-  letter-spacing: .16em;
-  text-transform: uppercase;
-  color: rgba(238, 250, 248, .72);
-  font-weight: 600;
-  margin-bottom: 6px;
-}
-.worksheet-result {
-  margin: 0;
-  display: flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: 8px;
-  color: #fff;
-}
-.worksheet-num {
-  font-family: var(--display);
-  font-size: clamp(2rem, 6vw, 2.5rem);
-  font-weight: 700;
-  letter-spacing: -.01em;
-  line-height: 1.05;
-}
-.worksheet-unit {
-  font-family: var(--display);
-  font-size: 1.05rem;
-  color: rgba(238, 250, 248, .85);
-}
-
-/* body */
-.worksheet-body { padding: 22px 30px 26px; }
-.worksheet-section {
-  display: block;
-  font-family: var(--body);
-  font-size: .72rem;
-  letter-spacing: .14em;
-  text-transform: uppercase;
-  color: var(--teal-700);
-  font-weight: 700;
-  margin-bottom: 16px;
-}
-
-/* numbered steps */
-.worksheet-steps {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-.worksheet-step {
-  display: flex;
-  gap: 16px;
-  padding: 16px 0;
-  border-top: 1px solid var(--line);
-}
-.worksheet-step:first-child { border-top: none; padding-top: 4px; }
+.worksheet-header { background: var(--accent-soft); border-left: 3px solid var(--accent); padding: var(--sp-5); }
+.worksheet-eyebrow { color: var(--accent-soft-ink); }
+.worksheet-result { margin: 0; display: flex; align-items: baseline; flex-wrap: wrap; gap: var(--sp-2); color: var(--accent-soft-ink); max-width: none; }
+.worksheet-num { font: var(--t-display); font-family: var(--font-mono); font-variant-numeric: tabular-nums; letter-spacing: 0; color: var(--accent-soft-ink); }
+.worksheet-unit { font: var(--t-h2); color: var(--accent-soft-ink); }
+.worksheet-body { padding: var(--sp-5); }
+.worksheet-steps { list-style: none; margin: 0; padding: 0; }
+.worksheet-step { display: flex; gap: var(--sp-4); padding: var(--sp-4) 0; border-top: 1px solid var(--line); }
+.worksheet-step:first-child { border-top: none; padding-top: var(--sp-1); }
 .worksheet-step-num {
-  flex: none;
-  width: 24px;
-  height: 24px;
-  margin-top: 2px;
-  border-radius: 50%;
-  background: var(--amber-panel-bg);
-  color: var(--amber-panel-text);
-  font-family: var(--body);
-  font-size: .82rem;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  flex: none; width: 28px; height: 28px; margin-top: 2px; border-radius: 50%;
+  background: var(--primary-soft); color: var(--primary-soft-ink);
+  font: var(--t-label); display: flex; align-items: center; justify-content: center;
 }
 .worksheet-step-main { min-width: 0; flex: 1; }
-.worksheet-step-title {
-  margin: 0 0 6px;
-  font-family: var(--display);
-  font-size: 1.02rem;
-  font-weight: 700;
-  color: var(--teal-900);
-}
-.worksheet-step-math {
-  font-family: var(--mono);
-  font-size: .95rem;
-  color: var(--ink);
-  line-height: 2.05;
-  letter-spacing: -.01em;
-  overflow-x: auto;
-}
-.worksheet-step-math b { font-weight: 700; }
-.worksheet-step-note {
-  margin: 8px 0 0;
-  font-family: var(--display);
-  font-style: italic;
-  font-size: .92rem;
-  color: var(--muted);
-  line-height: 1.6;
-}
-
-/* one-line formula footer */
+.worksheet-step-title { margin: 0 0 var(--sp-2); font: var(--t-h3); color: var(--ink-2); max-width: none; }
+.worksheet-step-math { font: var(--t-quantity); font-variant-numeric: tabular-nums; color: var(--ink); line-height: 2.05; overflow-x: auto; }
+.worksheet-step-math b { font-weight: var(--w-semi); }
+.worksheet-step-note { margin: var(--sp-2) 0 0; color: var(--muted); max-width: none; }
 .worksheet-oneline {
-  margin-top: 18px;
-  padding-top: 18px;
-  border-top: 1px dashed var(--line);
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 10px;
-  font-family: var(--display);
-  color: var(--ink);
-  overflow-x: auto;
+  margin-top: var(--sp-4); padding-top: var(--sp-4); border-top: 1px dashed var(--line-strong);
+  display: flex; align-items: center; flex-wrap: wrap; gap: var(--sp-3); color: var(--ink); overflow-x: auto;
 }
-.worksheet-oneline-label {
-  font-family: var(--display);
-  font-style: italic;
-  color: var(--muted);
-  font-size: .98rem;
-}
-.worksheet-oneline-formula {
-  font-family: var(--mono);
-  font-size: .98rem;
-  letter-spacing: -.01em;
-  color: var(--teal-900);
-}
-.worksheet-oneline-formula sub { font-size: .72em; }
+.worksheet-oneline-label { font-style: italic; color: var(--muted); }
+.worksheet-oneline-formula { font: var(--t-quantity); color: var(--ink-2); }
+.worksheet-oneline-formula sub { font-size: 0.72em; }
 
-@media (max-width: 560px) {
-  .worksheet-header { padding: 18px 20px 16px; }
-  .worksheet-body { padding: 18px 20px 22px; }
+@media (max-width: 600px) {
+  .prompt-card, .fields-card, .converter-bar { padding: var(--sp-4); }
+  .step-strategy-zone, .step-calc-zone { padding: var(--sp-4); }
+  .step-combo-actions { padding: 0 var(--sp-4) var(--sp-4); }
+  .answer-callout--learn { padding: var(--sp-5) var(--sp-4); }
+  .answer-callout--learn .answer-value { font-size: 1.5rem; }
+  .worksheet-header, .worksheet-body { padding: var(--sp-4); }
 }
 
-/* ---------- accessibility: respect reduced motion ---------- */
-@media (prefers-reduced-motion: reduce) {
-  *, .screen.is-active, .step-block, .math-card, .answer-callout,
-  .prompt-card, .fields-card, .solution { animation: none !important; transition: none !important; }
-}
-
-/* ---------- native dropdown popup theming ----------
-   The <select> popup list is rendered by the browser with its own
-   native UI. Without a color-scheme declaration the popup always
-   renders LIGHT (grey list, white text on the disabled placeholder,
-   default OS-blue hover) even when the page is in dark mode.
-   Declaring color-scheme lets the browser draw the popup with
-   dark-native chrome, and the option rules below tint it to the
-   stoichiomathics deep-teal accent. */
-:root { color-scheme: light; }
-[data-theme="dark"] { color-scheme: dark; }
-
-.select option {
-  background: var(--card);
-  color: var(--ink);
-}
+/* native dropdown popup */
+.select option { background: var(--card); color: var(--ink); }
 .select option:disabled { color: var(--muted); }
 
-/* Deep-teal accent for the highlighted / chosen row (Firefox honours
-   background on :hover and :checked; Chrome honours :checked via the
-   flat-gradient + inset-shadow pair). #0f3b37 = stoichiomathics
-   --accent-soft; #7af2e4 = its bright-teal ink counterpart. */
-[data-theme="dark"] .select option:hover,
-[data-theme="dark"] .select option:focus,
-[data-theme="dark"] .select option:checked {
-  background: #0f3b37;
-  background-image: linear-gradient(#0f3b37, #0f3b37);
-  box-shadow: 0 0 10px 100px #0f3b37 inset;
-  color: #7af2e4;
-}
-
-/* Light mode: keep the popup native but swap the OS-blue selection
-   for the same teal family so both themes feel like one app. */
-.select option:checked {
-  background-image: linear-gradient(var(--teal-100), var(--teal-100));
+@media (prefers-reduced-motion: reduce) {
+  *, .screen.is-active, .step-block, .math-card, .answer-callout, .prompt-card, .fields-card, .solution {
+    animation: none !important; transition: none !important;
+  }
+  .btn:hover, .choice-card:hover, .theme-toggle:hover { transform: none !important; }
 }

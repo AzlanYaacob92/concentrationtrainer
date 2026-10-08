@@ -14,7 +14,11 @@
   if (!toggleBtn) return;
   const root = document.documentElement;
 
-  function isDark() { return root.getAttribute('data-theme') === 'dark'; }
+  function isDark() {
+    const t = root.getAttribute('data-theme');
+    if (t === 'dark' || t === 'light') return t === 'dark';
+    try { return !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches); } catch (e) { return false; }
+  }
 
   function reflect() {
     const dark = isDark();
@@ -404,7 +408,7 @@
         rowCells.forEach(c => {
           c.style.opacity = '0';
           c.style.transform = 'translateY(4px)';
-          c.style.transition = 'opacity .28s var(--ease-buttery), transform .28s var(--ease-buttery)';
+          c.style.transition = 'opacity .28s var(--ease), transform .28s var(--ease)';
         });
         setTimeout(() => rowCells.forEach(c => {
           c.style.opacity = '1';
