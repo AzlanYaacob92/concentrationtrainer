@@ -49,7 +49,7 @@
   // runs, then `toEl` arrives. fromEl and toEl may be the same element,
   // refreshed in place.
   function panTransition(fromEl, toEl, direction, updateFn) {
-    Motion.swap(fromEl, toEl, updateFn);
+    return Motion.swap(fromEl, toEl, updateFn);
   }
   function enterCard(el) {
     if (!el) return;
