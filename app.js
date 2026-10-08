@@ -24,7 +24,7 @@
     const dark = isDark();
     toggleBtn.setAttribute('aria-pressed', String(dark));
     toggleBtn.setAttribute('aria-label', dark ? 'Switch to light mode' : 'Switch to dark mode');
-    if (icon) icon.textContent = dark ? '☀️' : '🌙';
+    if (icon) icon.innerHTML = Icons.svg(dark ? 'sun' : 'moon');
   }
 
   reflect(); // match whatever the inline head script already applied
@@ -292,8 +292,8 @@
     return `<span class="eqgrid" style="grid-template-columns:max-content max-content minmax(0, max-content)">${cells}</span>`;
   }
 
-  // Render a math grid into an element, revealing its equation rows with a
-  // gentle stagger (the calculation "reveal" for the Learn combo card).
+  // Reveal for a math grid: the working arrives one line at a time, top to
+  // bottom, at reading pace. The same reveal is used by every trainer.
   function revealMathGrid(el, html) {
     el.innerHTML = mathGrid(html);
     const grid = el.querySelector('.eqgrid');
@@ -305,9 +305,10 @@
       byRow.get(r).push(c);
     });
     Array.from(byRow.values()).forEach((rowCells, i) => {
-      rowCells.forEach(c => Motion.enter(c, { y: 4, duration: 'base', delay: i * 150 }));
+      rowCells.forEach(c => Motion.enter(c, { y: 4, duration: 'base', delay: i * LINE_GAP_MS }));
     });
   }
+  const LINE_GAP_MS = 180;   // pause between lines of working
 
   // Build the redesigned worksheet card: a deep-teal result header,
   // then the numbered step-by-step working, then the one-line formula.
